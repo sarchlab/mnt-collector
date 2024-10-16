@@ -1,0 +1,31 @@
+package aws
+
+import (
+	"context"
+	"log"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+
+	"github.com/sarchlab/mnt-collector/config"
+)
+
+var mntClient *s3.Client
+var mntBucket *string
+
+func Init() {
+	mntClient = s3.New(s3.Options{
+		Region: config.SC.AWS.Region,
+		Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(
+			config.SC.AWS.AccessKeyID, config.SC.AWS.SecretAccessKey, "")),
+	})
+	mntBucket = aws.String(config.SC.AWS.Bucket)
+
+	_, err := mntClient.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
+		Bucket: mntBucket,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}

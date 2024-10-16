@@ -1,0 +1,28 @@
+# Environment
+gpu: test
+cuda-version: test
+machine: test
+
+# Simulation Config
+repeat-times: 50
+update-to-server: false
+
+# Benchmark Details
+cases:
+- title: mergeSort
+  suite: cuda-samples
+  directory: /usr/local/cuda-samples/Samples/0_introduction/mergeSort/
+  command: ./usr/local/cuda-samples/Samples/0_introduction/mergeSort/mergeSort
+  args:
+  - param1: 2048
+  # - param1: 4096
+  # - param1: 8192
+
+- title: vectorAdd
+  suite: cuda-samples
+  directory: /usr/local/cuda-samples/Samples/0_Simple/vectorAdd/
+  command: ./usr/local/cuda-samples/Samples/0_Simple/vectorAdd/vectorAdd
+  args:
+  - param1: 50000
+  # - param1: 100000
+  # - param1: 500000
