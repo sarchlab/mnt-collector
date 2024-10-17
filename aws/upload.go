@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -19,19 +20,20 @@ func MultiplePartUpload(object string, filepath string) {
 	key := aws.String(object)
 	file, err := os.Open(filepath)
 	if err != nil {
-		log.Fatalf("Failed to open file, %v", err)
+		log.WithError(err).Panic("Failed to open file")
 	}
 	defer file.Close()
 
+	log.WithField("object", object).Info("Creating multipart upload")
 	output, err := mntClient.CreateMultipartUpload(context.TODO(), &s3.CreateMultipartUploadInput{
 		Bucket: mntBucket,
 		Key:    key,
 	})
 	if err != nil {
-		log.Fatalf("Failed to create multipart upload, %v", err)
+		log.WithError(err).Panic("Failed to create multipart upload")
 	}
 
-	log.Printf("UploadID: %s\n", *output.UploadId)
+	log.WithField("uploadID", *output.UploadId).Info("Uploading parts")
 	parts := uploadParts(output.UploadId, key, file)
 
 	_, err = mntClient.CompleteMultipartUpload(context.TODO(), &s3.CompleteMultipartUploadInput{
@@ -42,10 +44,10 @@ func MultiplePartUpload(object string, filepath string) {
 		},
 	})
 	if err != nil {
-		log.Fatalf("Failed to complete multipart upload, %v", err)
+		log.WithError(err).Error("Failed to complete multipart upload")
 	}
 
-	log.Printf("Uploaded %s as %s\n", filepath, object)
+	log.WithField("object", object).Info("File uploaded")
 }
 
 func uploadParts(uploadID *string, key *string, file *os.File) []types.CompletedPart {
@@ -59,7 +61,7 @@ func uploadParts(uploadID *string, key *string, file *os.File) []types.Completed
 			if err == io.EOF {
 				break
 			}
-			log.Fatalf("Failed to read file, %v", err)
+			log.WithError(err).Panic("Failed to read file")
 		}
 
 		output, err := mntClient.UploadPart(context.TODO(), &s3.UploadPartInput{
@@ -70,7 +72,7 @@ func uploadParts(uploadID *string, key *string, file *os.File) []types.Completed
 			Body:       bytes.NewReader(data[:bytesRead]),
 		})
 		if err != nil {
-			log.Fatalf("Failed to upload part, %v", err)
+			log.WithError(err).Panic("Failed to upload part")
 		}
 
 		parts = append(parts, types.CompletedPart{
@@ -78,7 +80,11 @@ func uploadParts(uploadID *string, key *string, file *os.File) []types.Completed
 			PartNumber: aws.Int32(partNumber),
 		})
 
-		log.Printf("Uploaded part %d of upload %d", partNumber, uploadID)
+		log.WithFields(log.Fields{
+			"part":   partNumber,
+			"etag":   *output.ETag,
+			"upload": uploadID,
+		}).Info("Part uploaded")
 		partNumber++
 	}
 
@@ -88,31 +94,38 @@ func uploadParts(uploadID *string, key *string, file *os.File) []types.Completed
 func UploadFileAsObject(object string, filepath string) {
 	fileInfo, err := os.Stat(filepath)
 	if err != nil {
-		log.Fatalf("Failed to get file info, %v", err)
+		log.WithError(err).Panic("Failed to get file info")
 	}
 
 	if fileInfo.Size() > partSize {
-		log.Printf("File size is greater than %d bytes, using multipart upload\n", partSize)
+		log.WithFields(log.Fields{
+			"filesize": fileInfo.Size(),
+			"partsize": partSize,
+		}).Info("Using multipart upload")
 		MultiplePartUpload(object, filepath)
 		return
 	}
 
 	file, err := os.Open(filepath)
 	if err != nil {
-		log.Fatalf("Failed to open file, %v", err)
+		log.WithError(err).Panic("Failed to open file")
 	}
 	defer file.Close()
 
+	log.WithField("object", object).Info("Uploading file")
 	_, err = mntClient.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: mntBucket,
 		Key:    aws.String(object),
 		Body:   file,
 	})
 	if err != nil {
-		log.Fatalf("Failed to upload file, %v", err)
+		log.WithError(err).Panic("Failed to upload file")
 	}
 
-	log.Printf("Uploaded %s as %s\n", filepath, object)
+	log.WithFields(log.Fields{
+		"object": object,
+		"size":   fileInfo.Size(),
+	}).Info("File uploaded")
 }
 
 func UploadDirectoryAsObjects(objectDir string, dirpath string) {
@@ -126,13 +139,12 @@ func UploadDirectoryAsObjects(objectDir string, dirpath string) {
 		}
 
 		objectPath := filepath.Join(objectDir, filepath.Base(path))
-		log.Printf("Uploading %s as %s\n", path, objectPath)
 		UploadFileAsObject(objectPath, path)
 
 		return nil
 	})
 
 	if err != nil {
-		log.Fatalf("Failed to walk directory, %v", err)
+		log.WithError(err).Panic("Failed to walk directory")
 	}
 }

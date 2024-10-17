@@ -1,29 +1,27 @@
 package config
 
 import (
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var C *SimSetting
 var SC *SecretConfig
-
-func LoadSimSetting(file string) {
-	C.load(file)
-}
-
-func LoadSecretConfig(file string) {
-	SC.load(file)
-}
 
 var (
 	projectRoot string
 	hostName    string
 	cudaVersion string
 	nsysVersion string
+)
+
+var (
+	tracerToolSo        string
+	tracerToolProcessor string
 )
 
 func ProjectRoot() string {
@@ -42,11 +40,6 @@ func NsysVersion() string {
 	return nsysVersion
 }
 
-var (
-	tracerToolSo        string
-	tracerToolProcessor string
-)
-
 func TracerToolSo() string {
 	return tracerToolSo
 }
@@ -64,10 +57,31 @@ func init() {
 	C = &SimSetting{}
 	SC = &SecretConfig{}
 
+	loadSimSetting()
+	loadSecretConfig()
+
 	tracerToolSo = filepath.Join(projectRoot, "lib/tracer_tool.so")
 	tracerToolProcessor = filepath.Join(projectRoot, "lib/post-traces-processing")
 	fileMustExist(tracerToolSo)
 	fileMustExist(tracerToolProcessor)
+}
+
+func loadSimSetting() {
+	file := "etc/simsetting.yaml"
+	if _, flag := os.LookupEnv("SIM_SETTING_FILE"); flag {
+		file = os.Getenv("SIM_SETTING_FILE")
+	}
+	log.WithField("file", file).Info("Loading sim setting")
+	C.load(file)
+}
+
+func loadSecretConfig() {
+	file := "etc/secret.yaml"
+	if _, flag := os.LookupEnv("SECRET_FILE"); flag {
+		file = os.Getenv("SECRET_FILE")
+	}
+	log.WithField("file", file).Info("Loading secret config")
+	SC.load(file)
 }
 
 func getProjectRoot() string {

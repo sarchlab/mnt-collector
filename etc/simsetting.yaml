@@ -1,9 +1,14 @@
 # Environment
 device-id: 0
+root: true
 
 # Simulation Config
-repeat-times: 50
-update-to-server: false
+upload-to-server: true
+trace-collect: 
+  enable: true
+profile-collect:
+  enable: true
+  repeat-times: 50
 
 # Benchmark Details
 cases:

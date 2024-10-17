@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/sarchlab/mnt-collector/collector"
 	"github.com/sarchlab/mnt-collector/config"
@@ -20,7 +21,7 @@ func Init() {
 
 	err := checkHealth()
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	envData := EnvRequest{
@@ -32,7 +33,7 @@ func Init() {
 	if err != nil {
 		log.Panic(err)
 	}
-	log.Printf("Current EnvID: %s\n", EnvID.Hex())
+	log.WithField("EnvID", EnvID.Hex()).Info("Successfully get env_id")
 }
 
 type OKResponse struct {

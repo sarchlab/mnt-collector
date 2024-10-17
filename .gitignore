@@ -1,3 +1,7 @@
 etc/secret.yaml
+etc/secret-local.yaml
+etc/simsetting-local.yaml
+
 lib/tracer_tool.so
 lib/post-traces-processing
+.envrc

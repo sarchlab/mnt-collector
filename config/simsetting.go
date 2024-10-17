@@ -1,18 +1,26 @@
 package config
 
 import (
-	"log"
 	"os"
 	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 
 	"gopkg.in/yaml.v3"
 )
 
 type SimSetting struct {
-	DeviceID int `yaml:"device-id"`
+	DeviceID int  `yaml:"device-id"`
+	Root     bool `yaml:"root"`
 
-	RepeatTimes    int  `yaml:"repeat-times"`
-	UpdateToServer bool `yaml:"update-to-server"`
+	UploadToServer bool `yaml:"upload-to-server"`
+	TraceCollect   struct {
+		Enable bool `yaml:"enable"`
+	} `yaml:"trace-collect"`
+	ProfileCollect struct {
+		Enable      bool `yaml:"enable"`
+		RepeatTimes int  `yaml:"repeat-times"`
+	}
 
 	Cases []struct {
 		Title     string `yaml:"title"`
@@ -30,7 +38,7 @@ func (c *SimSetting) load(file string) {
 	file = filepath.Join(projectRoot, file)
 	bytes, err := os.ReadFile(file)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 	err = yaml.Unmarshal(bytes, c)
 	if err != nil {

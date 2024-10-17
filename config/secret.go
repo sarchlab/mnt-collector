@@ -1,11 +1,12 @@
 package config
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type SecretConfig struct {
@@ -28,7 +29,7 @@ func (c *SecretConfig) load(file string) {
 	file = filepath.Join(projectRoot, file)
 	bytes, err := os.ReadFile(file)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 	err = yaml.Unmarshal(bytes, c)
 	if err != nil {

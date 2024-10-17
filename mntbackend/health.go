@@ -3,9 +3,10 @@ package mntbackend
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var ErrorNotHealthy = errors.New("mnt backend is not healthy")
@@ -23,7 +24,7 @@ func checkHealth() error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("mnt backend is not healthy: %s", resp.Status)
+		log.WithField("status", resp.Status).Warn("mnt backend is not healthy")
 		return ErrorNotHealthy
 	}
 
