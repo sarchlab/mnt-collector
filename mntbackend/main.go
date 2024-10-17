@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 
+	"github.com/sarchlab/mnt-collector/collector"
 	"github.com/sarchlab/mnt-collector/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -23,9 +24,9 @@ func Init() {
 	}
 
 	envData := EnvRequest{
-		GPU:         config.C.GPU,
-		Machine:     config.C.Machine,
-		CUDAVersion: config.C.CudaVersion,
+		GPU:         collector.DeviceName(),
+		Machine:     config.HostName(),
+		CUDAVersion: config.CudaVersion(),
 	}
 	EnvID, err = GetEnvID(envData)
 	if err != nil {

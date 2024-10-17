@@ -1,7 +1,5 @@
 # Environment
-gpu: test
-cuda-version: test
-machine: test
+device-id: 0
 
 # Simulation Config
 repeat-times: 50

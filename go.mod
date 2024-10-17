@@ -3,6 +3,7 @@ module github.com/sarchlab/mnt-collector
 go 1.23.0
 
 require (
+	github.com/NVIDIA/go-nvml v0.12.4-0
 	github.com/aws/aws-sdk-go-v2 v1.32.2
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.41
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.66.0
