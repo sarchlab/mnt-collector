@@ -3,7 +3,6 @@ package mntbackend
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -16,8 +15,6 @@ type EnvRequest struct {
 	Machine     string `json:"machine"`
 	CUDAVersion string `json:"cuda_version"`
 }
-
-var ErrorEnvIDNotFound = errors.New("env_id not found")
 
 func GetEnvID(data EnvRequest) (primitive.ObjectID, error) {
 	url := fmt.Sprintf("%s/env-id", URLBase)
@@ -43,7 +40,7 @@ func GetEnvID(data EnvRequest) (primitive.ObjectID, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return primitive.NilObjectID, ErrorEnvIDNotFound
+		return primitive.NilObjectID, ErrorStatusNotOK
 	}
 
 	var envID primitive.ObjectID

@@ -3,7 +3,7 @@ device-id: 0
 root: true
 
 # Simulation Config
-upload-to-server: true
+upload-to-server: false
 trace-collect: 
   enable: true
 profile-collect:
@@ -17,15 +17,13 @@ cases:
   directory: /usr/local/cuda-samples/Samples/0_introduction/mergeSort/
   command: ./usr/local/cuda-samples/Samples/0_introduction/mergeSort/mergeSort
   args:
-  - param1: 2048
-  # - param1: 4096
-  # - param1: 8192
+  - size: 2048
+  - size: 4096
 
-- title: vectorAdd
+- title: scalarProd
   suite: cuda-samples
-  directory: /usr/local/cuda-samples/Samples/0_Simple/vectorAdd/
-  command: ./usr/local/cuda-samples/Samples/0_Simple/vectorAdd/vectorAdd
+  directory: /usr/local/cuda-samples/Samples/0_Simple/scalarProd/
+  command: ./usr/local/cuda-samples/Samples/0_Simple/scalarProd/scalarProd
   args:
-  - param1: 50000
-  # - param1: 100000
-  # - param1: 500000
+  - vectorN: 64
+    elementN: 2048

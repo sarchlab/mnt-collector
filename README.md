@@ -9,6 +9,9 @@
 - [ ] DeviceSetGpuLockedClocks
 - [ ] DeviceSetPersistenceMode
 - [x] logrus
+- [x] fix the param part 
+    - [ ] sync with backend
+- [ ] profile to the same file
 
 ### Environment Check List
 - gpu

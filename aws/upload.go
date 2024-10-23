@@ -16,7 +16,7 @@ import (
 
 const partSize = 512 * 1024 * 1024 // 0.5GB
 
-func MultiplePartUpload(object string, filepath string) {
+func multiplePartUpload(object string, filepath string) {
 	key := aws.String(object)
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -91,7 +91,7 @@ func uploadParts(uploadID *string, key *string, file *os.File) []types.Completed
 	return parts
 }
 
-func UploadFileAsObject(object string, filepath string) {
+func uploadFileAsObject(object string, filepath string) {
 	fileInfo, err := os.Stat(filepath)
 	if err != nil {
 		log.WithError(err).Panic("Failed to get file info")
@@ -102,7 +102,7 @@ func UploadFileAsObject(object string, filepath string) {
 			"filesize": fileInfo.Size(),
 			"partsize": partSize,
 		}).Info("Using multipart upload")
-		MultiplePartUpload(object, filepath)
+		multiplePartUpload(object, filepath)
 		return
 	}
 
@@ -138,8 +138,13 @@ func UploadDirectoryAsObjects(objectDir string, dirpath string) {
 			return nil
 		}
 
-		objectPath := filepath.Join(objectDir, filepath.Base(path))
-		UploadFileAsObject(objectPath, path)
+		base, err := filepath.Rel(dirpath, path)
+		if err != nil {
+			log.WithError(err).Panic("Failed to get relative path")
+		}
+
+		objectPath := filepath.Join(objectDir, base)
+		uploadFileAsObject(objectPath, path)
 
 		return nil
 	})

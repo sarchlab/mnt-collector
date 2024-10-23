@@ -11,7 +11,7 @@ import (
 func main() {
 	log.SetLevel(log.DebugLevel)
 
-	collector.LoadDevice(config.C.DeviceID)
+	config.LoadDevice(config.C.DeviceID)
 	log.Info("Device loaded.")
 
 	mntbackend.Init()
@@ -20,5 +20,6 @@ func main() {
 	aws.Init()
 	log.Info("AWS connected.")
 
-	// collector.Start()
+	log.Info("Start collecting data.")
+	collector.Run()
 }
