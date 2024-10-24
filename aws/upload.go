@@ -24,7 +24,7 @@ func multiplePartUpload(object string, filepath string) {
 	}
 	defer file.Close()
 
-	log.WithField("object", object).Info("Creating multipart upload")
+	log.WithField("object", object).Debug("Creating multipart upload")
 	output, err := mntClient.CreateMultipartUpload(context.TODO(), &s3.CreateMultipartUploadInput{
 		Bucket: mntBucket,
 		Key:    key,
@@ -33,7 +33,7 @@ func multiplePartUpload(object string, filepath string) {
 		log.WithError(err).Panic("Failed to create multipart upload")
 	}
 
-	log.WithField("uploadID", *output.UploadId).Info("Uploading parts")
+	log.WithField("uploadID", *output.UploadId).Debug("Uploading parts")
 	parts := uploadParts(output.UploadId, key, file)
 
 	_, err = mntClient.CompleteMultipartUpload(context.TODO(), &s3.CompleteMultipartUploadInput{
@@ -112,7 +112,7 @@ func uploadFileAsObject(object string, filepath string) {
 	}
 	defer file.Close()
 
-	log.WithField("object", object).Info("Uploading file")
+	log.WithField("object", object).Debug("Uploading file")
 	_, err = mntClient.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: mntBucket,
 		Key:    aws.String(object),

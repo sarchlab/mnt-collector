@@ -13,7 +13,9 @@ import (
 const profilesDir = "/tmp/mnt-collector/profiles/"
 
 type ProfileData struct {
-	AvgCycles float64
+	AvgNanoSec   float64
+	Frequency    uint32
+	MaxFrequency uint32
 }
 
 func runProfileCollect(cases []Case) {
@@ -97,13 +99,17 @@ func getProfileData(profileFiles []string) ProfileData {
 	}
 
 	repeatTimes := len(profileFiles)
-	avgCycles := float64(sumTime) / float64(repeatTimes) / (1e9 * float64(config.Frequency()))
+	avgNanoSec := float64(sumTime) / float64(repeatTimes)
+	//	avgCycles := float64(sumTime) / float64(repeatTimes) / (1e9 * float64(config.Frequency()))
 
 	data := ProfileData{
-		AvgCycles: avgCycles,
+		AvgNanoSec:   avgNanoSec,
+		Frequency:    config.Frequency(),
+		MaxFrequency: config.MaxFrequency(),
+		// AvgCycles: avgCycles,
 	}
 	log.WithFields(log.Fields{
-		"AvgCycles": avgCycles,
+		"avgNanoSec": avgNanoSec,
 	}).Info("Profile data")
 
 	return data
@@ -116,7 +122,10 @@ func uploadProfileToDB(c Case, data ProfileData) {
 		Benchmark:   c.Title,
 		Param:       c.param,
 		RepeatTimes: c.RepeatTimes,
-		AvgCycles:   data.AvgCycles,
+
+		AvgNanoSec:   data.AvgNanoSec,
+		Frequency:    data.Frequency,
+		MaxFrequency: data.MaxFrequency,
 	}
 	profileID, err := mntbackend.UploadProfile(req)
 	if err != nil {

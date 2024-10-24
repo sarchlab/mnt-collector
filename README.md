@@ -18,3 +18,8 @@
 - nsight compute
 - lib/tracer_tool.so
 - lib/post-traces-processing
+
+```
+export SECRET_FILE=etc/secret-local.yaml
+export SIM_SETTING_FILE=etc/simsetting-local.yaml
+```

@@ -16,8 +16,10 @@ type ProfileRequest struct {
 	Benchmark string             `json:"benchmark" bson:"benchmark"`
 	Param     Param              `json:"param" bson:"param"`
 
-	RepeatTimes int32   `json:"repeat_times" bson:"repeat_times"`
-	AvgCycles   float64 `json:"avg_cycles" bson:"avg_cycles"`
+	RepeatTimes  int32   `json:"repeat_times" bson:"repeat_times"`
+	AvgNanoSec   float64 `json:"avg_nano_sec" bson:"avg_nano_sec"`
+	Frequency    uint32  `json:"frequency" bson:"frequency"`
+	MaxFrequency uint32  `json:"max_frequency" bson:"max_frequency"`
 }
 
 type Param struct {

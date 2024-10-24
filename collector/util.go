@@ -16,7 +16,7 @@ func runCommandWithTimer(cmd *exec.Cmd) error {
 	log.WithFields(log.Fields{
 		"cmd":  cmd.Path,
 		"args": cmd.Args,
-		"env":  cmd.Env,
+		//"env":  cmd.Env,
 	}).Debug("Command started")
 
 	ticker := time.NewTicker(1 * time.Second)
