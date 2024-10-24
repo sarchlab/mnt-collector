@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/sarchlab/mnt-collector/aws"
 	"github.com/sarchlab/mnt-collector/config"
@@ -18,7 +19,7 @@ const (
 )
 
 func runTraceCollect(cases []Case) {
-	err := os.Mkdir(tracesDir, 0755)
+	err := os.MkdirAll(tracesDir, 0755)
 	if err != nil {
 		log.WithError(err).Error("Failed to create trace directory")
 	}
@@ -28,7 +29,7 @@ func runTraceCollect(cases []Case) {
 			"Title":   c.Title,
 			"Suite":   c.Suite,
 			"Command": c.Command,
-			"Params":  c.ParamStrs,
+			"Params":  c.ParamStr,
 		}).Info("Start trace collection")
 
 		traceDir, err := generateTrace(c)
@@ -40,11 +41,12 @@ func runTraceCollect(cases []Case) {
 		log.Info("Start processing trace")
 		processTrace(traceDir)
 
-		s3Path := storeTraceToS3(traceDir)
-		log.WithField("s3Path", s3Path).Info("Trace stored to S3")
-
 		if config.C.UploadToServer {
 			log.Info("Start uploading to server")
+
+			s3Path := storeTraceToS3(traceDir)
+			log.WithField("s3Path", s3Path).Info("Trace stored to S3")
+
 			uploadTraceToDB(c, s3Path)
 		} else {
 			log.Info("Skip uploading to server")
@@ -53,7 +55,8 @@ func runTraceCollect(cases []Case) {
 }
 
 func generateTrace(c Case) (string, error) {
-	cmd := exec.Command(c.Command, c.ParamStrs...)
+	args := strings.Split(c.ParamStr, " ")
+	cmd := exec.Command(c.Command, args...)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("LD_PRELOAD=%s", config.TracerToolSo()))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
 	cmd.Env = append(cmd.Env, "USER_DEFINED_FOLDERS=1")
@@ -109,16 +112,17 @@ func storeTraceToS3(traceDir string) string {
 
 func processTrace(dir string) {
 	cmd := exec.Command(config.TracerToolProcessor(), fmt.Sprintf("%s/kernelslist", dir))
-	err := cmd.Run()
+	err := runCommandWithTimer(cmd)
 	if err != nil {
 		log.WithError(err).Error("Failed to run traces processor")
 		return
 	}
 
-	cmd = exec.Command("rm", fmt.Sprintf("%s/*.trace", dir))
+	log.Info("Deleting trace files")
+	cmd = exec.Command("bash", "-c", fmt.Sprintf("rm %s/*.trace", dir))
 	err = cmd.Run()
 	if err != nil {
-		log.WithError(err).Error("Failed to remove trace files")
+		log.WithField("dir", dir).WithError(err).Error("Failed to remove trace files")
 		return
 	}
 

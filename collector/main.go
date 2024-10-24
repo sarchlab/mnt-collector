@@ -10,10 +10,10 @@ import (
 )
 
 type Case struct {
-	Title     string
-	Suite     string
-	Command   string
-	ParamStrs []string
+	Title    string
+	Suite    string
+	Command  string
+	ParamStr string
 
 	directory   string
 	param       mntbackend.Param
@@ -47,25 +47,27 @@ func extractCases(cases []config.Case, repeatTimes int32) []Case {
 			val := reflect.ValueOf(a)
 			typ := reflect.TypeOf(a)
 
-			var paramStrs []string
+			var paramStr string
 			for i := 0; i < val.NumField(); i++ {
 				field := val.Field(i)
 				fieldType := typ.Field(i)
 
-				yamlTag := fieldType.Tag.Get("yaml")
-				str := fmt.Sprintf("-%s %v", yamlTag, field.Interface())
-				paramStrs = append(paramStrs, str)
+				if !field.IsZero() {
+					yamlTag := fieldType.Tag.Get("yaml")
+					str := fmt.Sprintf("-%s %v", yamlTag, field.Interface())
+					paramStr += str + " "
+				}
 			}
-			ec.ParamStrs = paramStrs
+			ec.ParamStr = paramStr
 
 			extracted = append(extracted, ec)
 			log.WithFields(log.Fields{
 				"Title":   ec.Title,
 				"Suite":   ec.Suite,
 				"Command": ec.Command,
-				"Params":  ec.ParamStrs,
+				"Params":  ec.ParamStr,
 				"Repeat":  ec.RepeatTimes,
-			}).Info("Case extracted")
+			}).Debug("Case extracted")
 		}
 	}
 	return extracted

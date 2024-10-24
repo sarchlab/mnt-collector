@@ -12,7 +12,7 @@ var (
 	device            nvml.Device
 	deviceName        string
 	computeCapability string
-	baseFrequency     uint32
+	frequency         uint32
 	maxFrequency      uint32
 )
 
@@ -24,8 +24,8 @@ func ComputeCapability() string {
 	return computeCapability
 }
 
-func BaseFrequency() uint32 {
-	return baseFrequency
+func Frequency() uint32 {
+	return frequency
 }
 
 func MaxFrequency() uint32 {
@@ -84,17 +84,17 @@ func initComputeCapability(device nvml.Device) {
 
 func initFrequency(device nvml.Device) {
 	var err nvml.Return
-	baseFrequency, err = device.GetClockInfo(nvml.CLOCK_SM)
+	frequency, err = device.GetClockInfo(nvml.CLOCK_SM)
 	if err != nvml.SUCCESS {
-		log.WithField("error", nvml.ErrorString(err)).Panic("Failed to get base frequency of device")
+		log.WithField("error", nvml.ErrorString(err)).Panic("Failed to get current frequency of device")
 	}
 	maxFrequency, err = device.GetMaxClockInfo(nvml.CLOCK_SM)
 	if err != nvml.SUCCESS {
 		log.WithField("error", nvml.ErrorString(err)).Panic("Failed to get max frequency of device")
 	}
 	log.WithFields(log.Fields{
-		"baseFrequency": baseFrequency,
-		"maxFrequency":  maxFrequency,
+		"frequency":    frequency,
+		"maxFrequency": maxFrequency,
 	}).Info("Device loading")
 }
 
@@ -104,7 +104,8 @@ func deviceMustIdle(device nvml.Device) {
 		log.WithField("error", nvml.ErrorString(err)).Panic("Failed to get utilization rates of device")
 	}
 	if utilization.Gpu != 0 {
-		log.Panic("Device is not idle")
+		log.Warn("Device is not idle")
+		// log.Panic("Device is not idle")
 	}
 }
 

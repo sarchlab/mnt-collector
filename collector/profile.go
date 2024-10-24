@@ -17,7 +17,7 @@ type ProfileData struct {
 }
 
 func runProfileCollect(cases []Case) {
-	err := os.Mkdir(profilesDir, 0755)
+	err := os.MkdirAll(profilesDir, 0755)
 	if err != nil {
 		log.WithError(err).Error("Failed to create profile directory")
 	}
@@ -27,7 +27,7 @@ func runProfileCollect(cases []Case) {
 			"Title":       c.Title,
 			"Suite":       c.Suite,
 			"Command":     c.Command,
-			"Params":      c.ParamStrs,
+			"Params":      c.ParamStr,
 			"RepeatTimes": c.RepeatTimes,
 		}).Info("Start profile collection")
 
@@ -42,7 +42,7 @@ func runProfileCollect(cases []Case) {
 			}
 
 			log.WithField("ProfileFile", profileFile).Info("Profiled")
-			profileFiles = append(profileFiles, profileFile)
+			profileFiles = append(profileFiles, fmt.Sprintf("%s.sqlite", profileFile))
 		}
 
 		if len(profileFiles) == int(c.RepeatTimes) {
@@ -67,8 +67,7 @@ func profile(c Case) (string, error) {
 		return "", err
 	}
 
-	cmd := exec.Command("nsys", "profile", "--stats=true", "--output="+file.Name(), c.Command)
-	cmd.Args = append(cmd.Args, c.ParamStrs...)
+	cmd := exec.Command("nsys", "profile", "--stats=true", "--output="+file.Name(), c.Command, c.ParamStr)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
 
 	log.Info("Start profiling")
@@ -98,7 +97,7 @@ func getProfileData(profileFiles []string) ProfileData {
 	}
 
 	repeatTimes := len(profileFiles)
-	avgCycles := float64(sumTime) / float64(repeatTimes) / (1e9 * float64(config.BaseFrequency()))
+	avgCycles := float64(sumTime) / float64(repeatTimes) / (1e9 * float64(config.Frequency()))
 
 	data := ProfileData{
 		AvgCycles: avgCycles,
