@@ -29,10 +29,10 @@ func (c *SecretConfig) load(file string) {
 	file = filepath.Join(projectRoot, file)
 	bytes, err := os.ReadFile(file)
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).WithField("file", file).Panic("Failed to read file")
 	}
 	err = yaml.Unmarshal(bytes, c)
 	if err != nil {
-		log.Panic(err)
+		log.WithError(err).WithField("file", file).Panic("Failed to unmarshal yaml")
 	}
 }

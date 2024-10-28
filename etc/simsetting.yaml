@@ -1,6 +1,7 @@
 # Environment
 device-id: 0
-root: true
+
+exclusive-mode: false
 
 # Simulation Config
 upload-to-server: false

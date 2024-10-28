@@ -69,14 +69,22 @@ func profile(c Case) (string, error) {
 		return "", err
 	}
 
-	cmd := exec.Command("nsys", "profile", "--stats=true", "--output="+file.Name(), c.Command, c.ParamStr)
-	cmd.Env = append(os.Environ(), fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
+	getCmd := func() *exec.Cmd {
+		cmd := exec.Command("nsys", "profile", "--stats=true", "--output="+file.Name(), c.Command, c.ParamStr)
+		cmd.Env = append(os.Environ(), fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
+		return cmd
+	}
 
 	log.Info("Start profiling")
-	err = runCommandWithTimer(cmd)
-	if err != nil {
-		log.Error("Failed to run command")
-		return "", err
+	for err := runGPUCmdWithTimer(getCmd()); err != nil; {
+		if err == ErrorInterrupted {
+			log.Warn("Interrupted, retry profiling")
+			waitTillDeviceIdle()
+			err = runGPUCmdWithTimer(getCmd())
+		} else {
+			log.WithError(err).Error("Failed to run command")
+			return "", err
+		}
 	}
 
 	return file.Name(), nil

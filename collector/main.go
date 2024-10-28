@@ -70,5 +70,8 @@ func extractCases(cases []config.Case, repeatTimes int32) []Case {
 			}).Debug("Case extracted")
 		}
 	}
+	if len(extracted) == 0 {
+		log.Warn("No case extracted")
+	}
 	return extracted
 }

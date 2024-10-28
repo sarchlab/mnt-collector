@@ -26,8 +26,8 @@ type CaseArg struct {
 }
 
 type SimSetting struct {
-	DeviceID int  `yaml:"device-id"`
-	RootMode bool `yaml:"root"`
+	DeviceID      int  `yaml:"device-id"`
+	ExclusiveMode bool `yaml:"exclusive-mode"`
 
 	UploadToServer bool `yaml:"upload-to-server"`
 	TraceCollect   struct {
@@ -45,10 +45,10 @@ func (c *SimSetting) load(file string) {
 	file = filepath.Join(projectRoot, file)
 	bytes, err := os.ReadFile(file)
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).WithField("file", file).Panic("Failed to read file")
 	}
 	err = yaml.Unmarshal(bytes, c)
 	if err != nil {
-		log.Panic(err)
+		log.WithError(err).WithField("file", file).Panic("Failed to unmarshal yaml")
 	}
 }

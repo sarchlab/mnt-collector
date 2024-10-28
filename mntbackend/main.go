@@ -22,7 +22,7 @@ func Init() {
 
 	err := checkHealth()
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).Panic("Failed to connect to MNT backend")
 	}
 
 	envData := EnvRequest{
@@ -32,7 +32,7 @@ func Init() {
 	}
 	envID, err = GetEnvID(envData)
 	if err != nil {
-		log.Panic(err)
+		log.WithError(err).Panic("Failed to get env_id")
 	}
 	log.WithField("EnvID", envID.Hex()).Info("Successfully get env_id")
 }

@@ -27,6 +27,6 @@ func Init() {
 		Bucket: mntBucket,
 	})
 	if err != nil {
-		log.Panic(err)
+		log.WithError(err).Panic("Failed to connect to AWS")
 	}
 }

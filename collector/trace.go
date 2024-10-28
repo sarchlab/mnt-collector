@@ -56,23 +56,31 @@ func runTraceCollect(cases []Case) {
 
 func generateTrace(c Case) (string, error) {
 	args := strings.Split(c.ParamStr, " ")
-	cmd := exec.Command(c.Command, args...)
-	cmd.Env = append(os.Environ(), fmt.Sprintf("LD_PRELOAD=%s", config.TracerToolSo()))
-	cmd.Env = append(cmd.Env, fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
-	cmd.Env = append(cmd.Env, "USER_DEFINED_FOLDERS=1")
-
 	dir, err := os.MkdirTemp(tracesDir, "trace-*")
 	if err != nil {
 		log.WithError(err).Error("Failed to create trace directory")
 		return "", err
 	}
-	cmd.Env = append(cmd.Env, fmt.Sprintf("TRACES_FOLDER=%s", dir))
+
+	getCmd := func() *exec.Cmd {
+		cmd := exec.Command(c.Command, args...)
+		cmd.Env = append(os.Environ(), fmt.Sprintf("LD_PRELOAD=%s", config.TracerToolSo()))
+		cmd.Env = append(cmd.Env, fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
+		cmd.Env = append(cmd.Env, "USER_DEFINED_FOLDERS=1")
+		cmd.Env = append(cmd.Env, fmt.Sprintf("TRACES_FOLDER=%s", dir))
+		return cmd
+	}
 
 	log.Info("Start generating trace")
-	err = runCommandWithTimer(cmd)
-	if err != nil {
-		log.WithError(err).Error("Failed to run trace collection")
-		return "", err
+	for err := runGPUCmdWithTimer(getCmd()); err != nil; {
+		if err == ErrorInterrupted {
+			log.Warn("Interrupted, retry trace collection")
+			waitTillDeviceIdle()
+			err = runGPUCmdWithTimer(getCmd())
+		} else {
+			log.WithError(err).Error("Failed to generate trace")
+			return "", err
+		}
 	}
 
 	return dir, nil
@@ -112,15 +120,14 @@ func storeTraceToS3(traceDir string) string {
 
 func processTrace(dir string) {
 	cmd := exec.Command(config.TracerToolProcessor(), fmt.Sprintf("%s/kernelslist", dir))
-	err := runCommandWithTimer(cmd)
-	if err != nil {
+	if err := runNormalCmdWithTimer(cmd); err != nil {
 		log.WithError(err).Error("Failed to run traces processor")
 		return
 	}
 
 	log.Info("Deleting trace files")
 	cmd = exec.Command("bash", "-c", fmt.Sprintf("rm %s/*.trace", dir))
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		log.WithField("dir", dir).WithError(err).Error("Failed to remove trace files")
 		return

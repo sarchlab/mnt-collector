@@ -32,17 +32,15 @@ func MaxFrequency() uint32 {
 	return maxFrequency
 }
 
+func Device() nvml.Device {
+	return device
+}
+
 func LoadDevice(deviceID int) {
 	ret := nvml.Init()
 	if ret != nvml.SUCCESS {
 		log.WithField("error", nvml.ErrorString(ret)).Fatal("Unable to initialize NVML")
 	}
-	defer func() {
-		ret := nvml.Shutdown()
-		if ret != nvml.SUCCESS {
-			log.WithField("error", nvml.ErrorString(ret)).Fatal("Unable to shutdown NVML")
-		}
-	}()
 
 	var err nvml.Return
 	device, err = nvml.DeviceGetHandleByIndex(deviceID)
@@ -55,13 +53,20 @@ func LoadDevice(deviceID int) {
 	initFrequency(device)
 
 	deviceMustIdle(device)
-	if C.RootMode {
+	if C.ExclusiveMode {
 		setExclusiveMode(device)
 		log.Info("Exclusive mode set")
 	} else {
 		log.Warn("Not running under exclusive mode")
 	}
 	log.WithField("deviceID", deviceID).Info("Device is ready")
+}
+
+func ShutdownDevice() {
+	ret := nvml.Shutdown()
+	if ret != nvml.SUCCESS {
+		log.WithField("error", nvml.ErrorString(ret)).Fatal("Unable to shutdown NVML")
+	}
 }
 
 func initDeviceName(device nvml.Device) {

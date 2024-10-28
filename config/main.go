@@ -87,7 +87,7 @@ func loadSecretConfig() {
 func getProjectRoot() string {
 	dir, err := os.Getwd()
 	if err != nil {
-		log.Panic(err)
+		log.WithError(err).Panic("could not get current working directory")
 	}
 
 	var root string
@@ -98,7 +98,7 @@ func getProjectRoot() string {
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
-			log.Panic("config: could not find project root")
+			log.Panic("could not find project root")
 		}
 		dir = parent
 	}
@@ -108,7 +108,7 @@ func getProjectRoot() string {
 func getHostName() string {
 	hostName, err := os.Hostname()
 	if err != nil {
-		log.Panic(err)
+		log.WithError(err).Warn("could not get hostname")
 	}
 	return hostName
 }
@@ -117,7 +117,7 @@ func getCudaVersion() string {
 	cmd := exec.Command("nvcc", "--version")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Panic(err)
+		log.WithError(err).Panic("could not get CUDA version")
 		return ""
 	}
 
@@ -129,7 +129,7 @@ func getCudaVersion() string {
 		}
 	}
 
-	log.Panic("config: could not find CUDA version")
+	log.Panic("could not find CUDA version")
 	return ""
 }
 
@@ -137,7 +137,7 @@ func getNsysVersion() string {
 	cmd := exec.Command("nsys", "--version")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Panic(err)
+		log.WithError(err).Panic("could not get Nsight Systems version")
 		return ""
 	}
 
@@ -149,13 +149,13 @@ func getNsysVersion() string {
 		}
 	}
 
-	log.Panic("config: could not find Nsight Systems version")
+	log.Panic("could not find Nsight Systems version")
 	return ""
 }
 
 func fileMustExist(file string) {
 	_, err := os.Stat(file)
 	if err != nil {
-		log.Panic(err)
+		log.WithField("file", file).WithError(err).Panic("file does not exist")
 	}
 }

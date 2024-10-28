@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	setLog()
+	initLogSettings()
 
 	config.LoadDevice(config.C.DeviceID)
 	log.Info("Device loaded.")
@@ -25,9 +25,10 @@ func main() {
 
 	log.Info("Start collecting data.")
 	collector.Run()
+	log.Info("Program finished.")
 }
 
-func setLog() {
+func initLogSettings() {
 	file, err := os.OpenFile("logfile.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal("Failed to open log file:", err)
@@ -36,4 +37,7 @@ func setLog() {
 
 	log.SetOutput(multiWriter)
 	log.SetLevel(log.DebugLevel)
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 }
