@@ -38,6 +38,7 @@ func multiplePartUpload(object string, filepath string) {
 
 	_, err = mntClient.CompleteMultipartUpload(context.TODO(), &s3.CompleteMultipartUploadInput{
 		Bucket:   mntBucket,
+		Key:      key,
 		UploadId: output.UploadId,
 		MultipartUpload: &types.CompletedMultipartUpload{
 			Parts: parts,
