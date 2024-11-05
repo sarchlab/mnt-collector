@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/sarchlab/mnt-collector/config"
 	"github.com/sarchlab/mnt-collector/mntbackend"
@@ -70,7 +71,10 @@ func profile(c Case) (string, error) {
 	}
 
 	getCmd := func() *exec.Cmd {
-		cmd := exec.Command("nsys", "profile", "--stats=true", "--output="+file.Name(), c.Command, c.ParamStr)
+		param := strings.Split(c.ParamStr, " ")
+		args := append([]string{"profile", "--stats=true", "--output=" + file.Name(), c.Command}, param...)
+		// cmd := exec.Command("nsys", "profile", "--stats=true", "--output="+file.Name(), c.Command, param...)
+		cmd := exec.Command("nsys", args...)
 		cmd.Env = append(os.Environ(), fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
 		return cmd
 	}
@@ -100,9 +104,17 @@ func getProfileData(profileFiles []string) ProfileData {
 			log.WithError(err).Error("Failed to get kernel activities")
 		}
 
+		log.WithField("profileFile", file).Debug("Processing profile")
 		for _, kernel := range activities {
+			// log.WithFields(log.Fields{
+			// 	"KernelName": kernel.KernelName,
+			// 	"StartTime":  kernel.StartTime,
+			// 	"EndTime":    kernel.EndTime,
+			// }).Debug("Kernel activity")
 			sumTime += kernel.EndTime - kernel.StartTime
 		}
+		// nowAvgNanoSec := float64(sumTime) / float64(i+1)
+		// log.WithField("AvgNanoSec", nowAvgNanoSec).Debug("Current average time")
 		profileFile.Close()
 	}
 
