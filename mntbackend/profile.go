@@ -28,6 +28,9 @@ type Param struct {
 	ElementN   int32 `json:"elementN,omitempty" bson:"elementN,omitempty"`
 	Log2Data   int32 `json:"log2data,omitempty" bson:"log2data,omitempty"`
 	Log2Kernel int32 `json:"log2kernel,omitempty" bson:"log2kernel,omitempty"`
+	DimX       int32 `json:"dimX,omitempty" bson:"dimX,omitempty"`
+	DimY       int32 `json:"dimY,omitempty" bson:"dimY,omitempty"`
+	Sizemult   int32 `json:"sizemult,omitempty" bson:"sizemult,omitempty"`
 }
 
 func UploadProfile(data ProfileRequest) (primitive.ObjectID, error) {
