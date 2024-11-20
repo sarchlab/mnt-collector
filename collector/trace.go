@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/aws"
 	"github.com/sarchlab/mnt-collector/config"
 	"github.com/sarchlab/mnt-collector/mntbackend"
@@ -42,12 +43,13 @@ func runTraceCollect(cases []Case) {
 		processTrace(traceDir)
 
 		if config.C.UploadToServer {
+			traceSize := getDirSize(traceDir)
 			log.Info("Start uploading to server")
 
 			s3Path := storeTraceToS3(traceDir)
 			log.WithField("s3Path", s3Path).Info("Trace stored to S3")
 
-			uploadTraceToDB(c, s3Path)
+			uploadTraceToDB(c, s3Path, traceSize)
 		} else {
 			log.Info("Skip uploading to server")
 		}
@@ -86,19 +88,23 @@ func generateTrace(c Case) (string, error) {
 	return dir, nil
 }
 
-func uploadTraceToDB(c Case, s3Path string) {
-	req := mntbackend.TraceRequest{
-		EnvID:     mntbackend.EnvID(),
-		Suite:     c.Suite,
-		Benchmark: c.Title,
-		Param:     c.param,
-		S3Path:    s3Path,
+func uploadTraceToDB(c Case, s3Path string, size string) {
+	req := model.DBTrace{
+		CaseKey: model.CaseKey{
+			EnvID:     mntbackend.EnvID(),
+			Suite:     c.Suite,
+			Benchmark: c.Title,
+			Param:     c.param,
+		},
+		S3Path: s3Path,
+		Size:   size,
 	}
-	traceID, err := mntbackend.UploadTrace(req)
+	traceID, err := mntbackend.UpdOrUplTrace(req)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"Case":   c,
 			"S3Path": s3Path,
+			"Size":   size,
 		}).WithError(err).Error("Failed to upload trace")
 	} else {
 		log.WithField("TraceID", traceID).Info("Trace uploaded")
@@ -139,4 +145,15 @@ func processTrace(dir string) {
 		log.WithError(err).Error("Failed to remove kernelslist")
 		return
 	}
+}
+
+func getDirSize(dir string) string {
+	cmd := exec.Command("du", "-sh", dir)
+	out, err := cmd.Output()
+	if err != nil {
+		log.WithError(err).Error("Failed to get directory size")
+		return ""
+	}
+
+	return strings.Split(string(out), "\t")[0]
 }

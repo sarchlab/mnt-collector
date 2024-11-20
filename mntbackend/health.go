@@ -1,15 +1,12 @@
 package mntbackend
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 )
-
-var ErrorNotHealthy = errors.New("mnt backend is not healthy")
 
 func checkHealth() error {
 	url := fmt.Sprintf("%s/health", URLBase)

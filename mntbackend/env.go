@@ -8,25 +8,21 @@ import (
 
 	"github.com/sarchlab/mnt-collector/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/sarchlab/mnt-backend/model"
 )
 
-type EnvRequest struct {
-	GPU         string `json:"gpu"`
-	Machine     string `json:"machine"`
-	CUDAVersion string `json:"cuda_version"`
-}
-
-func GetEnvID(data EnvRequest) (primitive.ObjectID, error) {
-	url := fmt.Sprintf("%s/env-id", URLBase)
+func FindEnv(data model.EnvKey) (model.DBEnv, error) {
+	url := fmt.Sprintf("%s/env/search", URLBase)
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return primitive.NilObjectID, err
+		return model.DBEnv{}, err
 	}
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return primitive.NilObjectID, err
+		return model.DBEnv{}, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -35,19 +31,73 @@ func GetEnvID(data EnvRequest) (primitive.ObjectID, error) {
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return primitive.NilObjectID, err
+		return model.DBEnv{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return primitive.NilObjectID, ErrorStatusNotOK
+		return model.DBEnv{}, ErrorStatusNotOK
 	}
 
-	var envID primitive.ObjectID
-	err = unmarshalResponseData(resp.Body, &envID)
+	var env model.DBEnv
+	err = unmarshalResponseData(resp.Body, &env)
+	if err != nil && err != ErrorNilData {
+		return model.DBEnv{}, err
+	}
+	if err == ErrorNilData {
+		return model.DBEnv{}, ObjectNotFound
+	}
+
+	return env, nil
+}
+
+func CreateEnv(data model.DBEnv) (model.DBEnv, error) {
+	url := fmt.Sprintf("%s/env", URLBase)
+
+	jsonData, err := json.Marshal(data)
 	if err != nil {
+		return model.DBEnv{}, err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return model.DBEnv{}, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", config.SC.MNT.Token))
+
+	client := http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return model.DBEnv{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return model.DBEnv{}, ErrorStatusNotOK
+	}
+
+	var env model.DBEnv
+	err = unmarshalResponseData(resp.Body, &env)
+	if err != nil {
+		return model.DBEnv{}, err
+	}
+
+	return env, nil
+}
+
+func GetOrBuildEnvID(data model.DBEnv) (primitive.ObjectID, error) {
+	env, err := FindEnv(data.EnvKey)
+	if err != nil && err != ObjectNotFound {
 		return primitive.NilObjectID, err
 	}
+	if err == ObjectNotFound {
+		env, err = CreateEnv(data)
+		if err != nil {
+			return primitive.NilObjectID, err
+		}
+	}
 
-	return envID, nil
+	return env.ID, nil
 }

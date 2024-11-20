@@ -1,12 +1,22 @@
 package mntbackend
 
 import (
+	"errors"
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/sarchlab/mnt-collector/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/sarchlab/mnt-backend/model"
+)
+
+var (
+	ErrorStatusNotOK = errors.New("response status not OK")
+	ErrorNilData     = errors.New("response data is nil")
+	ErrorNotHealthy  = errors.New("mnt backend health check failed")
+	ObjectNotFound   = errors.New("not found")
 )
 
 var URLBase string
@@ -25,12 +35,14 @@ func Init() {
 		log.WithError(err).Panic("Failed to connect to MNT backend")
 	}
 
-	envData := EnvRequest{
-		GPU:         config.DeviceName(),
-		Machine:     config.HostName(),
-		CUDAVersion: config.CudaVersion(),
+	envData := model.DBEnv{
+		EnvKey: model.EnvKey{
+			GPU:         config.DeviceName(),
+			Machine:     config.HostName(),
+			CUDAVersion: config.CudaVersion(),
+		},
 	}
-	envID, err = GetEnvID(envData)
+	envID, err = GetOrBuildEnvID(envData)
 	if err != nil {
 		log.WithError(err).Panic("Failed to get env_id")
 	}

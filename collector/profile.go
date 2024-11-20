@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
 	"github.com/sarchlab/mnt-collector/mntbackend"
 	log "github.com/sirupsen/logrus"
@@ -136,18 +137,19 @@ func getProfileData(profileFiles []string) ProfileData {
 }
 
 func uploadProfileToDB(c Case, data ProfileData) {
-	req := mntbackend.ProfileRequest{
-		EnvID:       mntbackend.EnvID(),
-		Suite:       c.Suite,
-		Benchmark:   c.Title,
-		Param:       c.param,
-		RepeatTimes: c.RepeatTimes,
-
+	req := model.DBProf{
+		CaseKey: model.CaseKey{
+			EnvID:     mntbackend.EnvID(),
+			Suite:     c.Suite,
+			Benchmark: c.Title,
+			Param:     c.param,
+		},
+		RepeatTimes:  c.RepeatTimes,
 		AvgNanoSec:   data.AvgNanoSec,
 		Frequency:    data.Frequency,
 		MaxFrequency: data.MaxFrequency,
 	}
-	profileID, err := mntbackend.UploadProfile(req)
+	profileID, err := mntbackend.UpdOrUplProfile(req)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"Case": c,

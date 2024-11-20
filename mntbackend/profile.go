@@ -6,44 +6,22 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ProfileRequest struct {
-	EnvID     primitive.ObjectID `json:"env_id" bson:"env_id"`
-	Suite     string             `json:"suite" bson:"suite"`
-	Benchmark string             `json:"benchmark" bson:"benchmark"`
-	Param     Param              `json:"param" bson:"param"`
-
-	RepeatTimes  int32   `json:"repeat_times" bson:"repeat_times"`
-	AvgNanoSec   float64 `json:"avg_nano_sec" bson:"avg_nano_sec"`
-	Frequency    uint32  `json:"frequency" bson:"frequency"`
-	MaxFrequency uint32  `json:"max_frequency" bson:"max_frequency"`
-}
-
-type Param struct {
-	Size       int32 `json:"size,omitempty" bson:"size,omitempty"`
-	VectorN    int32 `json:"vectorN,omitempty" bson:"vectorN,omitempty"`
-	ElementN   int32 `json:"elementN,omitempty" bson:"elementN,omitempty"`
-	Log2Data   int32 `json:"log2data,omitempty" bson:"log2data,omitempty"`
-	Log2Kernel int32 `json:"log2kernel,omitempty" bson:"log2kernel,omitempty"`
-	DimX       int32 `json:"dimX,omitempty" bson:"dimX,omitempty"`
-	DimY       int32 `json:"dimY,omitempty" bson:"dimY,omitempty"`
-	Sizemult   int32 `json:"sizemult,omitempty" bson:"sizemult,omitempty"`
-}
-
-func UploadProfile(data ProfileRequest) (primitive.ObjectID, error) {
+func CreateProfile(data model.DBProf) (model.DBProf, error) {
 	url := fmt.Sprintf("%s/profile", URLBase)
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return primitive.NilObjectID, err
+		return model.DBProf{}, err
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return primitive.NilObjectID, err
+		return model.DBProf{}, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -52,19 +30,109 @@ func UploadProfile(data ProfileRequest) (primitive.ObjectID, error) {
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return primitive.NilObjectID, err
+		return model.DBProf{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return primitive.NilObjectID, ErrorStatusNotOK
+		return model.DBProf{}, ErrorStatusNotOK
 	}
 
-	var profileID primitive.ObjectID
-	err = unmarshalResponseData(resp.Body, &profileID)
+	var profile model.DBProf
+	err = unmarshalResponseData(resp.Body, &profile)
+	if err != nil {
+		return model.DBProf{}, err
+	}
+
+	return profile, nil
+}
+
+func UpdateProfile(id primitive.ObjectID, data model.DBProf) error {
+	url := fmt.Sprintf("%s/profile/%s", URLBase, id.Hex())
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", config.SC.MNT.Token))
+
+	client := http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return ErrorStatusNotOK
+	}
+
+	return nil
+}
+
+func FindProfile(data model.CaseKey) (model.DBProf, error) {
+	url := fmt.Sprintf("%s/profile", URLBase)
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return model.DBProf{}, err
+	}
+
+	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return model.DBProf{}, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", config.SC.MNT.Token))
+
+	client := http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return model.DBProf{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return model.DBProf{}, ErrorStatusNotOK
+	}
+
+	var profile model.DBProf
+	err = unmarshalResponseData(resp.Body, &profile)
+	if err != nil && err != ErrorNilData {
+		return model.DBProf{}, err
+	}
+	if err == ErrorNilData {
+		return model.DBProf{}, ObjectNotFound
+	}
+
+	return profile, nil
+}
+
+func UpdOrUplProfile(data model.DBProf) (primitive.ObjectID, error) {
+	profile, err := FindProfile(data.CaseKey)
+	if err != nil {
+		if err == ObjectNotFound {
+			createdProfile, err := CreateProfile(data)
+			if err != nil {
+				return primitive.NilObjectID, err
+			}
+			return createdProfile.ID, nil
+		}
+		return primitive.NilObjectID, err
+	}
+
+	err = UpdateProfile(profile.ID, data)
 	if err != nil {
 		return primitive.NilObjectID, err
 	}
 
-	return profileID, nil
+	return profile.ID, nil
 }

@@ -22,6 +22,10 @@ func unmarshalResponseData(r io.Reader, data interface{}) error {
 		return err
 	}
 
+	if len(resp.Data) == 0 {
+		return ErrorNilData
+	}
+
 	err = json.Unmarshal(resp.Data, data)
 	if err != nil {
 		return err

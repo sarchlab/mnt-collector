@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
-	"github.com/sarchlab/mnt-collector/mntbackend"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,7 +16,7 @@ type Case struct {
 	ParamStr string
 
 	directory   string
-	param       mntbackend.Param
+	param       model.Param
 	RepeatTimes int32
 }
 
@@ -40,7 +40,7 @@ func extractCases(cases []config.Case, repeatTimes int32) []Case {
 				Suite:       c.Suite,
 				Command:     c.Command,
 				directory:   c.Directory,
-				param:       mntbackend.Param(a),
+				param:       a,
 				RepeatTimes: repeatTimes,
 			}
 
