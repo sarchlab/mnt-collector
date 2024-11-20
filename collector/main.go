@@ -3,6 +3,7 @@ package collector
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
@@ -54,7 +55,8 @@ func extractCases(cases []config.Case, repeatTimes int32) []Case {
 
 				if !field.IsZero() {
 					yamlTag := fieldType.Tag.Get("yaml")
-					str := fmt.Sprintf("-%s %v", yamlTag, field.Interface())
+					yamlKey := strings.Split(yamlTag, ",")[0]
+					str := fmt.Sprintf("-%s %v", yamlKey, field.Interface())
 					paramStr += str + " "
 				}
 			}

@@ -39,8 +39,9 @@ func runTraceCollect(cases []Case) {
 			continue
 		}
 
-		log.Info("Start processing trace")
+		log.WithField("trace-dir", traceDir).Info("Start processing trace")
 		processTrace(traceDir)
+		createInfoFile(traceDir, c)
 
 		if config.C.UploadToServer {
 			traceSize := getDirSize(traceDir)
@@ -131,7 +132,7 @@ func processTrace(dir string) {
 		return
 	}
 
-	log.Info("Deleting trace files")
+	log.Info("Deleting original trace files")
 	cmd = exec.Command("bash", "-c", fmt.Sprintf("rm %s/*.trace", dir))
 	err := cmd.Run()
 	if err != nil {
@@ -143,6 +144,36 @@ func processTrace(dir string) {
 	err = cmd.Run()
 	if err != nil {
 		log.WithError(err).Error("Failed to remove kernelslist")
+		return
+	}
+}
+
+func createInfoFile(dir string, c Case) {
+	infoFile := filepath.Join(dir, "INFO")
+	file, err := os.Create(infoFile)
+	if err != nil {
+		log.WithError(err).Error("Failed to create info file")
+		return
+	}
+	defer file.Close()
+
+	infoContent := fmt.Sprintf(
+		`Title: %s
+Suite: %s
+Command: %s
+Params: %s
+DeviceID: %d
+HostName: %s
+DeviceName: %s
+CudaVersion: %s
+`,
+		c.Title, c.Suite, c.Command, c.ParamStr,
+		config.C.DeviceID, config.HostName(),
+		config.DeviceName(), config.CudaVersion())
+
+	_, err = file.WriteString(infoContent)
+	if err != nil {
+		log.WithError(err).Error("Failed to write info to file")
 		return
 	}
 }
