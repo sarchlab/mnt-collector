@@ -100,6 +100,15 @@ func uploadTraceToDB(c Case, s3Path string, size string) {
 		S3Path: s3Path,
 		Size:   size,
 	}
+	oldTrace, err := mntbackend.FindTrace(req.CaseKey)
+	if err == nil {
+		err = aws.DeleteObjectDirectory(oldTrace.S3Path)
+		if err != nil {
+			log.WithError(err).Error("Failed to delete old trace")
+		} else {
+			log.Info("Old trace deleted")
+		}
+	}
 	traceID, err := mntbackend.UpdOrUplTrace(req)
 	if err != nil {
 		log.WithFields(log.Fields{

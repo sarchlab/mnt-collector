@@ -129,21 +129,19 @@ func uploadFileAsObject(object string, filepath string) {
 	}).Info("File uploaded")
 }
 
-func UploadDirectoryAsObjects(objectDir string, dirpath string) {
-	err := filepath.Walk(dirpath, func(path string, info os.FileInfo, err error) error {
+func UploadDirectoryAsObjects(objectDir string, localDir string) {
+	err := filepath.Walk(localDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-
 		if info.IsDir() {
 			return nil
-		}
+		} // Skip directories
 
-		base, err := filepath.Rel(dirpath, path)
+		base, err := filepath.Rel(localDir, path)
 		if err != nil {
 			log.WithError(err).Panic("Failed to get relative path")
 		}
-
 		objectPath := filepath.Join(objectDir, base)
 		uploadFileAsObject(objectPath, path)
 

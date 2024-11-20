@@ -8,6 +8,7 @@ import (
 
 	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
+	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -35,6 +36,7 @@ func CreateTrace(data model.DBTrace) (model.DBTrace, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		log.WithField("status", resp.Status).Warn("failed to create trace")
 		return model.DBTrace{}, ErrorStatusNotOK
 	}
 
@@ -71,6 +73,7 @@ func UpdateTrace(id primitive.ObjectID, data model.DBTrace) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		log.WithField("status", resp.Status).Warn("failed to update trace")
 		return ErrorStatusNotOK
 	}
 
@@ -84,7 +87,7 @@ func UpdateTrace(id primitive.ObjectID, data model.DBTrace) error {
 }
 
 func FindTrace(data model.CaseKey) (model.DBTrace, error) {
-	url := fmt.Sprintf("%s/trace", URLBase)
+	url := fmt.Sprintf("%s/trace/search", URLBase)
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -107,6 +110,7 @@ func FindTrace(data model.CaseKey) (model.DBTrace, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		log.WithField("status", resp.Status).Warn("failed to find trace")
 		return model.DBTrace{}, ErrorStatusNotOK
 	}
 

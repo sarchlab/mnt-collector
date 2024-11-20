@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"context"
-
 	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -23,9 +21,7 @@ func Init() {
 	})
 	mntBucket = aws.String(config.SC.AWS.Bucket)
 
-	_, err := mntClient.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
-		Bucket: mntBucket,
-	})
+	_, err := ListObjects("")
 	if err != nil {
 		log.WithError(err).Panic("Failed to connect to AWS")
 	}

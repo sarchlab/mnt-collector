@@ -78,7 +78,7 @@ func UpdateProfile(id primitive.ObjectID, data model.DBProf) error {
 }
 
 func FindProfile(data model.CaseKey) (model.DBProf, error) {
-	url := fmt.Sprintf("%s/profile", URLBase)
+	url := fmt.Sprintf("%s/profile/search", URLBase)
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
