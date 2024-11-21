@@ -56,8 +56,9 @@ func runProfileCollect(cases []Case) {
 			if config.C.UploadToServer {
 				log.Info("Start uploading to server")
 				uploadProfileToDB(c, data)
+			} else {
+				log.Info("Skip uploading to server")
 			}
-
 		} else {
 			log.Error("Profile not completed, skip processing")
 		}

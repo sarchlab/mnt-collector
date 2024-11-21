@@ -99,30 +99,41 @@ func cleanOldTraceData(c Case) {
 	}
 
 	oldTrace, err := mntbackend.FindTrace(key)
-	if err == nil {
+	if mntbackend.IsObjectNotFound(err) {
+		log.Info("Old trace not exist, skip deletion")
+		return
+	} else if err != nil {
+		log.WithError(err).Error("Failed to find old trace")
+		return
+	}
+
+	exist, err := aws.CheckObjectExist(oldTrace.S3Path)
+	if err != nil {
+		log.WithError(err).Error("Failed to check old trace")
+		return
+	}
+	if exist {
 		err = aws.DeleteObjectDirectory(oldTrace.S3Path)
 		if err != nil {
 			log.WithError(err).Error("Failed to delete old trace")
 		} else {
 			log.WithField("s3", oldTrace.S3Path).Info("Old trace deleted")
 		}
-
-		reletivePath, err := filepath.Rel(traceRootRemote, oldTrace.S3Path)
-		if err != nil {
-			log.WithError(err).Error("Failed to get relative path")
-			return
-		}
-		localDir := filepath.Join(traceRootLocal, reletivePath)
-		err = DeleteLocalDir(localDir)
-		if err != nil {
-			log.WithError(err).Error("Failed to delete local trace")
-		} else {
-			log.WithField("localPath", localDir).Info("Local trace deleted")
-		}
-	} else if mntbackend.IsObjectNotFound(err) {
-		log.Info("Old trace not exist, skip deletion")
 	} else {
-		log.WithError(err).Error("Failed to find old trace")
+		log.Info("Old trace not exist, skip deletion")
+	}
+
+	reletivePath, err := filepath.Rel(traceRootRemote, oldTrace.S3Path)
+	if err != nil {
+		log.WithError(err).Error("Failed to get relative path")
+		return
+	}
+	localDir := filepath.Join(traceRootLocal, reletivePath)
+	err = DeleteLocalDir(localDir)
+	if err != nil {
+		log.WithError(err).Error("Failed to delete local trace")
+	} else {
+		log.WithField("localPath", localDir).Info("Local trace deleted")
 	}
 }
 
