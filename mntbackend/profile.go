@@ -112,6 +112,7 @@ func FindProfile(data model.CaseKey) (model.DBProf, error) {
 	if err == ErrorNilData {
 		return model.DBProf{}, ObjectNotFound
 	}
+	fmt.Println(profile, err)
 
 	return profile, nil
 }
