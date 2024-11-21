@@ -2,27 +2,25 @@ package collector
 
 import (
 	"os"
-	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func MannualCleanTraceDirectory() {
-	
-}
-
-func DeleteTempProfileFiles(filenames []string) {
-	for _, filename := range filenames {
-		file := filepath.Join(profilesDir, filename)
-		if err := os.Remove(file); err != nil {
-			log.WithField("file", file).WithError(err).Error("Failed to remove temporary file")
+func DeleteLocalFiles(filepaths []string) error {
+	var lastErr error
+	for _, path := range filepaths {
+		if err := os.Remove(path); err != nil {
+			log.WithField("file", path).WithError(err).Error("Failed to remove temporary file")
+			lastErr = err
 		}
 	}
+	return lastErr
 }
 
-func DeleteTempTraceDirectory(dirname string) {
-	dir := filepath.Join(tracesDir, dirname)
-	if err := os.RemoveAll(dir); err != nil {
-		log.WithField("directory", dir).WithError(err).Error("Failed to remove temporary directory")
+func DeleteLocalDir(dirpath string) error {
+	err := os.RemoveAll(dirpath)
+	if err != nil {
+		log.WithField("directory", dirpath).WithError(err).Error("Failed to remove temporary directory")
 	}
+	return err
 }

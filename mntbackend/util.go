@@ -33,3 +33,7 @@ func unmarshalResponseData(r io.Reader, data interface{}) error {
 
 	return nil
 }
+
+func IsObjectNotFound(err error) bool {
+	return err == ObjectNotFound || err == ErrorNilData
+}

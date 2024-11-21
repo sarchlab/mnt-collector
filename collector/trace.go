@@ -15,12 +15,12 @@ import (
 )
 
 const (
-	tracesDir   = "/tmp/mnt-collector/traces/"
-	tracesDirS3 = "traces/"
+	traceRootLocal  = "/tmp/mnt-collector/traces/"
+	traceRootRemote = "traces/"
 )
 
 func runTraceCollect(cases []Case) {
-	err := os.MkdirAll(tracesDir, 0755)
+	err := os.MkdirAll(traceRootLocal, 0755)
 	if err != nil {
 		log.WithError(err).Error("Failed to create trace directory")
 	}
@@ -50,6 +50,7 @@ func runTraceCollect(cases []Case) {
 			s3Path := storeTraceToS3(traceDir)
 			log.WithField("s3Path", s3Path).Info("Trace stored to S3")
 
+			cleanOldTraceData(c)
 			uploadTraceToDB(c, s3Path, traceSize)
 		} else {
 			log.Info("Skip uploading to server")
@@ -59,7 +60,7 @@ func runTraceCollect(cases []Case) {
 
 func generateTrace(c Case) (string, error) {
 	args := strings.Split(c.ParamStr, " ")
-	dir, err := os.MkdirTemp(tracesDir, "trace-*")
+	dir, err := os.MkdirTemp(traceRootLocal, "trace-*")
 	if err != nil {
 		log.WithError(err).Error("Failed to create trace directory")
 		return "", err
@@ -89,6 +90,42 @@ func generateTrace(c Case) (string, error) {
 	return dir, nil
 }
 
+func cleanOldTraceData(c Case) {
+	key := model.CaseKey{
+		EnvID:     mntbackend.EnvID(),
+		Suite:     c.Suite,
+		Benchmark: c.Title,
+		Param:     c.param,
+	}
+
+	oldTrace, err := mntbackend.FindTrace(key)
+	if err == nil {
+		err = aws.DeleteObjectDirectory(oldTrace.S3Path)
+		if err != nil {
+			log.WithError(err).Error("Failed to delete old trace")
+		} else {
+			log.WithField("s3", oldTrace.S3Path).Info("Old trace deleted")
+		}
+
+		reletivePath, err := filepath.Rel(traceRootRemote, oldTrace.S3Path)
+		if err != nil {
+			log.WithError(err).Error("Failed to get relative path")
+			return
+		}
+		localDir := filepath.Join(traceRootLocal, reletivePath)
+		err = DeleteLocalDir(localDir)
+		if err != nil {
+			log.WithError(err).Error("Failed to delete local trace")
+		} else {
+			log.WithField("localPath", localDir).Info("Local trace deleted")
+		}
+	} else if mntbackend.IsObjectNotFound(err) {
+		log.Info("Old trace not exist, skip deletion")
+	} else {
+		log.WithError(err).Error("Failed to find old trace")
+	}
+}
+
 func uploadTraceToDB(c Case, s3Path string, size string) {
 	req := model.DBTrace{
 		CaseKey: model.CaseKey{
@@ -99,15 +136,6 @@ func uploadTraceToDB(c Case, s3Path string, size string) {
 		},
 		S3Path: s3Path,
 		Size:   size,
-	}
-	oldTrace, err := mntbackend.FindTrace(req.CaseKey)
-	if err == nil {
-		err = aws.DeleteObjectDirectory(oldTrace.S3Path)
-		if err != nil {
-			log.WithError(err).Error("Failed to delete old trace")
-		} else {
-			log.Info("Old trace deleted")
-		}
 	}
 	traceID, err := mntbackend.UpdOrUplTrace(req)
 	if err != nil {
@@ -122,13 +150,13 @@ func uploadTraceToDB(c Case, s3Path string, size string) {
 }
 
 func storeTraceToS3(traceDir string) string {
-	base, err := filepath.Rel(tracesDir, traceDir)
+	base, err := filepath.Rel(traceRootLocal, traceDir)
 	if err != nil {
 		log.WithError(err).Error("Failed to get relative path")
 		return ""
 	}
 
-	objectPath := filepath.Join(tracesDirS3, base)
+	objectPath := filepath.Join(traceRootRemote, base)
 	aws.UploadDirectoryAsObjects(objectPath, traceDir)
 
 	return objectPath
