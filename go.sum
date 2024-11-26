@@ -91,6 +91,8 @@ github.com/sarchlab/mnt-backend v0.0.0-20241120211628-77c0c566526b h1:NtfgFoRgds
 github.com/sarchlab/mnt-backend v0.0.0-20241120211628-77c0c566526b/go.mod h1:MupEGO05uk7EdjNyYKyQZZCxWkPlFtAyRbV03QDEPcQ=
 github.com/sarchlab/mnt-backend v0.0.0-20241126200221-e934a7dd39ad h1:TDjm6YIDaM1go6pJgaNkhD/Z3B93SiQ+XC3rg48aClE=
 github.com/sarchlab/mnt-backend v0.0.0-20241126200221-e934a7dd39ad/go.mod h1:6o5YPzCjf8E9V2GNsgUOwgizFCUuAB4uxxub4EfHJ+8=
+github.com/sarchlab/mnt-backend v0.0.0-20241126201636-ebc46a5efd80 h1:R1V25HtVFZXFF7gNWCHcomcuKRtyq+afz/zvt8VLYzY=
+github.com/sarchlab/mnt-backend v0.0.0-20241126201636-ebc46a5efd80/go.mod h1:6o5YPzCjf8E9V2GNsgUOwgizFCUuAB4uxxub4EfHJ+8=
 github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=
 github.com/sirupsen/logrus v1.9.3/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

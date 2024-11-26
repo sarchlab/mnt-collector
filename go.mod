@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.69.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.24
-	github.com/sarchlab/mnt-backend v0.0.0-20241126200221-e934a7dd39ad
+	github.com/sarchlab/mnt-backend v0.0.0-20241126201636-ebc46a5efd80
 	github.com/sirupsen/logrus v1.9.3
 	go.mongodb.org/mongo-driver v1.17.1
 	gopkg.in/yaml.v3 v3.0.1
