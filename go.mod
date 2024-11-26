@@ -16,6 +16,12 @@ require (
 )
 
 require (
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/spf13/cobra v1.8.1 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+)
+
+require (
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.7 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.24 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.24 // indirect

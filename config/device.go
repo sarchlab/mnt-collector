@@ -17,22 +17,37 @@ var (
 )
 
 func DeviceName() string {
+	if deviceName == "" {
+		log.Panic("deviceName is not initialized")
+	}
 	return deviceName
 }
 
 func ComputeCapability() string {
+	if computeCapability == "" {
+		log.Panic("computeCapability is not initialized")
+	}
 	return computeCapability
 }
 
 func Frequency() uint32 {
+	if frequency == 0 {
+		log.Panic("frequency is not initialized")
+	}
 	return frequency
 }
 
 func MaxFrequency() uint32 {
+	if maxFrequency == 0 {
+		log.Panic("maxFrequency is not initialized")
+	}
 	return maxFrequency
 }
 
 func Device() nvml.Device {
+	if device == nil {
+		log.Panic("device is not initialized")
+	}
 	return device
 }
 

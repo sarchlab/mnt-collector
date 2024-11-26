@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
 	"github.com/sarchlab/mnt-collector/mntbackend"
@@ -20,23 +21,25 @@ type ProfileData struct {
 	MaxFrequency uint32
 }
 
-func runProfileCollect(cases []Case) {
+func RunProfileCollection() {
+	caseSettings := generateCaseSettings(config.C.Cases)
+	repeatTimes := config.C.RepeatTimes
+
 	err := os.MkdirAll(profilesDir, 0755)
 	if err != nil {
 		log.WithError(err).Error("Failed to create profile directory")
 	}
 
-	for _, c := range cases {
+	for _, c := range caseSettings {
 		log.WithFields(log.Fields{
-			"Title":       c.Title,
-			"Suite":       c.Suite,
-			"Command":     c.Command,
-			"Params":      c.ParamStr,
-			"RepeatTimes": c.RepeatTimes,
+			"Title":   c.Title,
+			"Suite":   c.Suite,
+			"Command": c.Command,
+			"Params":  c.ParamStr,
 		}).Info("Start profile collection")
 
 		var profileFiles []string
-		for i := 0; i < int(c.RepeatTimes); i++ {
+		for i := 0; i < int(repeatTimes); i++ {
 			log.WithField("Repeat", i).Info("Start profiling")
 
 			profileFile, err := profile(c)
@@ -49,13 +52,13 @@ func runProfileCollect(cases []Case) {
 			profileFiles = append(profileFiles, fmt.Sprintf("%s.sqlite", profileFile))
 		}
 
-		if len(profileFiles) == int(c.RepeatTimes) {
+		if len(profileFiles) == int(repeatTimes) {
 			log.Info("Start processing profile")
 			data := getProfileData(profileFiles)
 
 			if config.C.UploadToServer {
 				log.Info("Start uploading to server")
-				uploadProfileToDB(c, data)
+				uploadProfileToDB(c, data, repeatTimes)
 			} else {
 				log.Info("Skip uploading to server")
 			}
@@ -65,7 +68,7 @@ func runProfileCollect(cases []Case) {
 	}
 }
 
-func profile(c Case) (string, error) {
+func profile(c CaseSetting) (string, error) {
 	file, err := os.CreateTemp(profilesDir, "profile-*.nsys")
 	if err != nil {
 		log.WithError(err).Error("Failed to create profile file")
@@ -137,7 +140,36 @@ func getProfileData(profileFiles []string) ProfileData {
 	return data
 }
 
-func uploadProfileToDB(c Case, data ProfileData) {
+type profileRawData struct {
+	KernelName string `db:"kernelName"`
+	StartTime  int64  `db:"start"`
+	EndTime    int64  `db:"end"`
+}
+
+func openDB(profileFile string) *sqlx.DB {
+	db, err := sqlx.Open("sqlite3", profileFile)
+	if err != nil {
+		log.WithError(err).Error("Failed to open profile file")
+	}
+	return db
+}
+
+func getKernelActivities(db *sqlx.DB) ([]profileRawData, error) {
+	query := `SELECT k.start, k.end, s.value AS kernelName
+		FROM CUPTI_ACTIVITY_KIND_KERNEL k
+		JOIN StringIds s ON k.demangledName = s.id;`
+
+	var results []profileRawData
+	err := db.Select(&results, query)
+	if err != nil {
+		log.WithError(err).Error("Failed to get kernel activities")
+		return nil, err
+	}
+
+	return results, nil
+}
+
+func uploadProfileToDB(c CaseSetting, data ProfileData, repeatTimes int32) {
 	req := model.DBProf{
 		CaseKey: model.CaseKey{
 			EnvID:     mntbackend.EnvID(),
@@ -145,7 +177,7 @@ func uploadProfileToDB(c Case, data ProfileData) {
 			Benchmark: c.Title,
 			Param:     c.param,
 		},
-		RepeatTimes:  c.RepeatTimes,
+		RepeatTimes:  repeatTimes,
 		AvgNanoSec:   data.AvgNanoSec,
 		Frequency:    data.Frequency,
 		MaxFrequency: data.MaxFrequency,

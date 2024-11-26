@@ -19,13 +19,15 @@ const (
 	traceRootRemote = "traces/"
 )
 
-func runTraceCollect(cases []Case) {
+func RunTraceCollection() {
+	caseSettings := generateCaseSettings(config.C.Cases)
+
 	err := os.MkdirAll(traceRootLocal, 0755)
 	if err != nil {
 		log.WithError(err).Error("Failed to create trace directory")
 	}
 
-	for _, c := range cases {
+	for _, c := range caseSettings {
 		log.WithFields(log.Fields{
 			"Title":   c.Title,
 			"Suite":   c.Suite,
@@ -58,7 +60,7 @@ func runTraceCollect(cases []Case) {
 	}
 }
 
-func generateTrace(c Case) (string, error) {
+func generateTrace(c CaseSetting) (string, error) {
 	args := strings.Split(c.ParamStr, " ")
 	dir, err := os.MkdirTemp(traceRootLocal, "trace-*")
 	if err != nil {
@@ -90,7 +92,7 @@ func generateTrace(c Case) (string, error) {
 	return dir, nil
 }
 
-func cleanOldTraceData(c Case) {
+func cleanOldTraceData(c CaseSetting) {
 	key := model.CaseKey{
 		EnvID:     mntbackend.EnvID(),
 		Suite:     c.Suite,
@@ -137,7 +139,7 @@ func cleanOldTraceData(c Case) {
 	}
 }
 
-func uploadTraceToDB(c Case, s3Path string, size string) {
+func uploadTraceToDB(c CaseSetting, s3Path string, size string) {
 	req := model.DBTrace{
 		CaseKey: model.CaseKey{
 			EnvID:     mntbackend.EnvID(),
@@ -196,7 +198,7 @@ func processTrace(dir string) {
 	}
 }
 
-func createInfoFile(dir string, c Case) {
+func createInfoFile(dir string, c CaseSetting) {
 	infoFile := filepath.Join(dir, "INFO")
 	file, err := os.Create(infoFile)
 	if err != nil {
