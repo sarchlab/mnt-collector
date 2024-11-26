@@ -120,7 +120,7 @@ func cleanOldTraceData(c Case) {
 			log.WithField("s3", oldTrace.S3Path).Info("Old trace deleted")
 		}
 	} else {
-		log.Info("Old trace not exist, skip deletion")
+		log.Info("Remote old trace not exist, skip deletion")
 	}
 
 	reletivePath, err := filepath.Rel(traceRootRemote, oldTrace.S3Path)
