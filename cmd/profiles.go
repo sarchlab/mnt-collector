@@ -21,10 +21,10 @@ Need gpu device.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config.LoadConfig(collectFile, secretFile)
 		if config.C.Cases == nil {
-			panic("Cases is not loaded from the collection settings file")
+			log.Panic("Cases is not loaded from the collection settings file")
 		}
 		if config.C.RepeatTimes == 0 {
-			panic("RepeatTimes is not loaded from the collection settings file")
+			log.Panic("RepeatTimes is not loaded from the collection settings file")
 		}
 		log.Info("Collection settings and secret tokens loaded.")
 
@@ -36,9 +36,10 @@ Need gpu device.`,
 		defer config.ShutdownDevice()
 
 		if config.C.UploadToServer {
-			mntbackend.Init()
+			mntbackend.Connect()
+			mntbackend.PrepareEnvID()
 			log.Info("MNT backend connected.")
-			aws.Init()
+			aws.Connect()
 			log.Info("AWS connected.")
 		} else {
 			log.Info("UploadToServer is set to false, no data will be uploaded to the server.")

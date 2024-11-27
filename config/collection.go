@@ -13,10 +13,9 @@ import (
 
 type CollectionSettings struct {
 	Experiment struct {
-		Version        string `yaml:"version"`
-		Message        string `yaml:"message"`
-		UploadToServer bool   `yaml:"upload-to-server"`
-		Runfile        string `yaml:"runfile"`
+		Version string `yaml:"version"`
+		Message string `yaml:"message"`
+		Runfile string `yaml:"runfile"`
 	} `yaml:"experiment"` // simulations
 	TraceIDs []primitive.ObjectID `yaml:"trace-id"` // simulations
 

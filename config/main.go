@@ -16,7 +16,7 @@ func init() {
 
 func LoadConfig(collectFile string, secretFile string) {
 	log.WithField("secretFile", secretFile).Info("Loading secret tokens")
-	SC.load(collectFile)
+	SC.load(secretFile)
 
 	log.WithField("collectFile", collectFile).Info("Loading collection settings")
 	C.load(collectFile)

@@ -7,10 +7,36 @@ import (
 	"net/http"
 
 	"github.com/sarchlab/mnt-collector/config"
+	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/sarchlab/mnt-backend/model"
 )
+
+var envID primitive.ObjectID
+
+func EnvID() primitive.ObjectID {
+	if envID == primitive.NilObjectID {
+		log.Panic("env_id is not initialized")
+	}
+	return envID
+}
+
+func PrepareEnvID() {
+	envData := model.DBEnv{
+		EnvKey: model.EnvKey{
+			GPU:         config.DeviceName(),
+			Machine:     config.HostName(),
+			CUDAVersion: config.CudaVersion(),
+		},
+	}
+	var err error
+	envID, err = GetOrBuildEnvID(envData)
+	if err != nil {
+		log.WithError(err).Panic("Failed to get env_id")
+	}
+	log.WithField("EnvID", envID.Hex()).Info("Successfully get env_id")
+}
 
 func FindEnv(data model.EnvKey) (model.DBEnv, error) {
 	url := fmt.Sprintf("%s/env/search", URLBase)

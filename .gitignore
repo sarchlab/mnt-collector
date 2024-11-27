@@ -1,4 +1,4 @@
-etc/secret-local.yaml
+etc/secrets-local.yaml
 etc/simsetting-local.yaml
 
 lib/tracer_tool.so

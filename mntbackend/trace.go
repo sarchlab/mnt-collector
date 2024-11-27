@@ -11,6 +11,36 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func GetTraceByID(id primitive.ObjectID) (model.DBTrace, error) {
+	url := fmt.Sprintf("%s/trace/%s", URLBase, id.Hex())
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return model.DBTrace{}, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", config.SC.MNT.Token))
+
+	client := http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return model.DBTrace{}, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return model.DBTrace{}, ErrorStatusNotOK
+	}
+
+	var trace model.DBTrace
+	err = unmarshalResponseData(resp.Body, &trace)
+	if err != nil {
+		return model.DBTrace{}, err
+	}
+
+	return trace, nil
+}
+
 func CreateTrace(data model.DBTrace) (model.DBTrace, error) {
 	url := fmt.Sprintf("%s/trace", URLBase)
 

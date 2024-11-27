@@ -17,7 +17,7 @@ const traceDir = "/tmp/mnt-traces/"
 var mntClient *s3.Client
 var mntBucket *string
 
-func Init() {
+func Connect() {
 	mntClient = s3.New(s3.Options{
 		Region: config.SC.AWS.Region,
 		Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(
