@@ -1,6 +1,7 @@
 etc/*
 !etc/secrets.yaml
-!etc/simsetting.yaml
+!etc/benchmarks.yaml
+!etc/simulations.yaml
 
 lib/tracer_tool.so
 lib/post-traces-processing
