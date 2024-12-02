@@ -1,6 +1,11 @@
-etc/secrets-local.yaml
-etc/simsetting-local.yaml
+etc/*
+!etc/secrets.yaml
+!etc/simsetting.yaml
 
 lib/tracer_tool.so
 lib/post-traces-processing
 .envrc
+
+mnt-collector
+rsync-exclude.txt
+*.log

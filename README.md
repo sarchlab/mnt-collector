@@ -1,16 +1,7 @@
-### Todo List
-- [ ] use nsight-compute to collect gold data at local, upload it to mnt-backend
-- [ ] use nvbit-tracer to generate traces, upload it to s3 and mnt-backend
-
 ### Feat
-- [ ] use mnt-backend's request type
-- [x] os env to set config `export SECRET_FILE` `export SIM_SETTING_FILE`
-    - [x] DeviceExclusiveMode (need root permission)
+- [x] use mnt-backend's request type
 - [ ] DeviceSetGpuLockedClocks
 - [ ] DeviceSetPersistenceMode
-- [x] logrus
-- [x] fix the param part 
-    - [x] sync with backend
 - [ ] profile to the same file
 
 ### Environment Check List
@@ -19,9 +10,24 @@
 - lib/tracer_tool.so
 - lib/post-traces-processing
 
-### Config
-
+### Run
 ```
-export SECRET_FILE=etc/secret-local.yaml
-export SIM_SETTING_FILE=etc/simsetting-local.yaml
+Data Collector for the MGPUSim NVIDIA Trace Project.
+[Commands]
+traces
+profiles
+simulations
+[Flags]
+-collect to specify the collection settings file
+-secret to specify the secret tokens file
+
+Usage:
+  mnt-collector [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  profiles    Use Nvidia system to profile the cases and upload the data to database & cloud.
+  simulations Use the given simulator to run traces and upload the data to database.
+  traces      Use Nvbit to generate traces and upload the data to database & cloud.
 ```
