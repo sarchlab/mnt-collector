@@ -6,6 +6,7 @@ import (
 
 	"github.com/sarchlab/mnt-collector/cmd"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func main() {
@@ -15,11 +16,13 @@ func main() {
 }
 
 func initLogSettings() {
-	file, err := os.OpenFile("logfile.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal("Failed to open log file:", err)
+	lumberjackLogger := &lumberjack.Logger{
+		Filename:   "logfile.log",
+		MaxSize:    2,
+		MaxBackups: 3,
+		MaxAge:     30,
 	}
-	multiWriter := io.MultiWriter(file, os.Stdout)
+	multiWriter := io.MultiWriter(lumberjackLogger, os.Stdout)
 
 	log.SetOutput(multiWriter)
 	log.SetLevel(log.DebugLevel)
