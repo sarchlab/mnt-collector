@@ -35,8 +35,8 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&collectFile, "collect", "ect/collects.yaml", "yaml file that store collection settings (default is etc/collects.yaml)")
-	rootCmd.PersistentFlags().StringVar(&secretFile, "secret", "etc/secrets.yaml", "yaml file that store secret tokens (default is etc/secrets.yaml)")
+	rootCmd.PersistentFlags().StringVar(&collectFile, "collect", "etc/collects.yaml", "yaml file that store collection settings")
+	rootCmd.PersistentFlags().StringVar(&secretFile, "secret", "etc/secrets.yaml", "yaml file that store secret tokens")
 
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
