@@ -12,7 +12,6 @@ import (
 var (
 	projectRoot string
 	hostName    string
-	cudaVersion string
 )
 
 func ProjectRoot() string {
@@ -29,17 +28,9 @@ func HostName() string {
 	return hostName
 }
 
-func CudaVersion() string {
-	if cudaVersion == "" {
-		log.Panic("cudaVersion is not initialized")
-	}
-	return cudaVersion
-}
-
 func prepareBasicEnvirons() {
 	projectRoot = getProjectRoot()
 	hostName = getHostName()
-	cudaVersion = getCudaVersion()
 }
 
 func getProjectRoot() string {
@@ -69,26 +60,6 @@ func getHostName() string {
 		log.WithError(err).Warn("could not get hostname")
 	}
 	return hostName
-}
-
-func getCudaVersion() string {
-	cmd := exec.Command("nvcc", "--version")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		log.WithError(err).Panic("could not get CUDA version")
-		return ""
-	}
-
-	lines := strings.Split(string(output), "\n")
-	for _, line := range lines {
-		if strings.Contains(line, "release") {
-			version := strings.Split(line, ",")[1]
-			return strings.TrimSpace(version)
-		}
-	}
-
-	log.Panic("could not find CUDA version")
-	return ""
 }
 
 func getNsysVersion() string {

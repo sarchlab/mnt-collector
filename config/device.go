@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"strings"
+	"os/exec"
 
 	log "github.com/sirupsen/logrus"
 
@@ -14,6 +16,7 @@ var (
 	computeCapability string
 	frequency         uint32
 	maxFrequency      uint32
+	cudaVersion 	  string
 )
 
 func DeviceName() string {
@@ -51,6 +54,13 @@ func Device() nvml.Device {
 	return device
 }
 
+func CudaVersion() string {
+	if cudaVersion == "" {
+		log.Panic("cudaVersion is not initialized")
+	}
+	return cudaVersion
+}
+
 func LoadDevice(deviceID int) {
 	ret := nvml.Init()
 	if ret != nvml.SUCCESS {
@@ -63,6 +73,8 @@ func LoadDevice(deviceID int) {
 		log.WithField("error", nvml.ErrorString(err)).Panic("Failed to get handle for device")
 	}
 
+
+	cudaVersion = getCudaVersion()
 	initDeviceName(device)
 	initComputeCapability(device)
 	initFrequency(device)
@@ -127,6 +139,26 @@ func deviceMustIdle(device nvml.Device) {
 		log.Warn("Device is not idle")
 		// log.Panic("Device is not idle")
 	}
+}
+
+func getCudaVersion() string {
+	cmd := exec.Command("nvcc", "--version")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.WithError(err).Panic("could not get CUDA version")
+		return ""
+	}
+
+	lines := strings.Split(string(output), "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "release") {
+			version := strings.Split(line, ",")[1]
+			return strings.TrimSpace(version)
+		}
+	}
+
+	log.Panic("could not find CUDA version")
+	return ""
 }
 
 func setExclusiveMode(device nvml.Device) {
