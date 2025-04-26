@@ -66,10 +66,11 @@ func simulate(traceDir string) (SimData, error) {
 	}
 
 	output := strings.TrimSpace(outBuff.String())
-	predictCycle, err := strconv.ParseInt(output, 10, 32)
+	// predictCycle, err := strconv.ParseInt(output, 10, 32)
+	predictCycleFloat, err := strconv.ParseFloat(output, 64)
 
 	data := SimData{
-		PredictCycle: int(predictCycle),
+		PredictCycle: int(predictCycleFloat),
 	}
 
 	return data, err
