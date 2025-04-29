@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/jmoiron/sqlx"
 	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"

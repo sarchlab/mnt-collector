@@ -159,6 +159,42 @@ func uploadTraceToDB(c CaseSetting, s3Path string, size string) {
 		}).WithError(err).Error("Failed to upload trace")
 	} else {
 		log.WithField("TraceID", traceID).Info("Trace uploaded")
+
+		// Build the param string nicely
+		paramList := strings.Split(c.ParamStr, " ")
+		formattedParams := []string{}
+		for i := 0; i < len(paramList)-1; i += 2 {
+			key := paramList[i]
+			value := paramList[i+1]
+			formattedParams = append(formattedParams, fmt.Sprintf("%s: %s", key, value))
+		}
+		paramStr := strings.Join(formattedParams, ", ")
+
+		// Get the plain string of traceID
+		traceIDStr := strings.TrimPrefix(fmt.Sprintf("%v", traceID), "ObjectID(\"")
+		traceIDStr = strings.TrimSuffix(traceIDStr, "\")")
+
+		// Create the log line
+		logLine := fmt.Sprintf("- %s # %s / %s / %s\n", traceIDStr, c.Suite, c.Title, paramStr)
+
+		// Build the file path: traceid/<Suite>-<Title>.txt
+		err := os.MkdirAll("traceid", os.ModePerm) // Make sure the folder exists
+		if err != nil {
+			log.WithError(err).Error("Failed to create traceid directory")
+			return
+		}
+		fileName := fmt.Sprintf("traceid/%s-%s.txt", c.Suite, c.Title)
+
+		f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.WithError(err).Errorf("Failed to open %s", fileName)
+			return
+		}
+		defer f.Close()
+
+		if _, err := f.WriteString(logLine); err != nil {
+			log.WithError(err).Errorf("Failed to write to %s", fileName)
+		}
 	}
 }
 
