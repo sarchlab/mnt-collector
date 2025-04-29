@@ -10,3 +10,6 @@ lib/post-traces-processing
 mnt-collector
 rsync-exclude.txt
 *.log
+
+traceid/*
+output*.txt
