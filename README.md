@@ -41,3 +41,45 @@ Flags:
 
 Use "mnt-collector [command] --help" for more information about a command.
 ```
+
+
+### Schedule
+To run mnt-collector with profiles, traces and simulations together, you may use python script schedule/schedule.py
+
+#### Example
+
+- [Step 1] Create a new yaml file under path `etc/{suite}/{bemnchmark}.yaml`, e.g., `etc/polybench/atax.yaml`. Example for the content: 
+
+```yaml
+# Environment
+device-id: 1
+exclusive-mode: false
+
+# Simulation Config
+upload-to-server: true
+trace-collect: 
+  enable: false
+profile-collect:
+  enable: true
+repeat-times: 3
+
+# Benchmark Details
+cases:
+  - title: atax
+    suite: polybench
+    directory: /home/exu03/workspace/GPU_Benchmarks/polybench/ATAX/
+    command: /home/exu03/workspace/GPU_Benchmarks/polybench/ATAX/atax.exe
+    args:
+    - size: 32
+    - size: 64
+```
+
+- [Step 2] Check currently there is no file with path `traceid/{suite}-{benchmark}.txt`, e.g., `traceid/polybench-atax.txt`. Remove it if exists.
+
+- [Step 3] Activate your python environment and then run:
+```shell
+python schedule/schedule.py --collect etc/{suite}/{benchmark}.yaml
+# Example: python schedule/schedule.py --collect etc/polybench/atax.yaml
+```
+
+- [Step 4] You may check the progress logs of the profiles, traces and simulations processes in file `etc/{suite}/{bemnchmark}-log.csv`, e.g., `etc/polybench/atax-log.csv`.
