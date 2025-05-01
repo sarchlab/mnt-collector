@@ -1,3 +1,0 @@
-.envrc
-secret-local.yaml
-simsetting-local.yaml
