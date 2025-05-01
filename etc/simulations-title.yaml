@@ -1,0 +1,6 @@
+upload-to-server: true
+experiment:
+  version: "1.0"
+  message: "base model"
+  runfile: /home/exu03/workspace/mgpusim/nvidia/nvidia
+

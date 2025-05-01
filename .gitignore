@@ -3,6 +3,7 @@ etc/secrets.yaml
 !etc/secrets.yaml.example
 !etc/benchmarks.yaml
 !etc/simulations.yaml
+!etc/simulations-title.yaml
 
 lib/tracer_tool.so
 lib/post-traces-processing
