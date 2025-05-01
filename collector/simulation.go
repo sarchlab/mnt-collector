@@ -82,7 +82,7 @@ func uploadSimToDB(traceID primitive.ObjectID, res SimData) {
 			ExpID:   mntbackend.ExpID(),
 			TraceID: traceID,
 		},
-		PredictCycle: res.PredictCycle,
+		PredictCycle: float64(res.PredictCycle),
 	}
 	simID, err := mntbackend.UpdOrUplSim(req)
 	if err != nil {
