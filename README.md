@@ -44,42 +44,46 @@ Use "mnt-collector [command] --help" for more information about a command.
 
 
 ### Schedule
-To run mnt-collector with profiles, traces and simulations together, you may use python script schedule/schedule.py
+To run `mnt-collector` with profiles, traces, and simulations together, use the Python script `schedule/schedule.py`.
 
-#### Example
+#### Steps
 
-- [Step 1] Create a new yaml file under path `etc/{suite}/{bemnchmark}.yaml`, e.g., `etc/polybench/atax.yaml`. Example for the content: 
+1. **Create a Configuration File**  
+   Create a new YAML file under the path `etc/{suite}/{benchmark}.yaml`. For example, `etc/polybench/atax.yaml`. Below is an example of the content:
 
-```yaml
-# Environment
-device-id: 1
-exclusive-mode: false
+   ```yaml
+   # Environment
+   device-id: 1
+   exclusive-mode: false
 
-# Simulation Config
-upload-to-server: true
-trace-collect: 
-  enable: false
-profile-collect:
-  enable: true
-repeat-times: 3
+   # Simulation Config
+   upload-to-server: true
+   trace-collect: 
+     enable: false
+   profile-collect:
+     enable: true
+   repeat-times: 3
 
-# Benchmark Details
-cases:
-  - title: atax
-    suite: polybench
-    directory: /home/exu03/workspace/GPU_Benchmarks/polybench/ATAX/
-    command: /home/exu03/workspace/GPU_Benchmarks/polybench/ATAX/atax.exe
-    args:
-    - size: 32
-    - size: 64
-```
+   # Benchmark Details
+   cases:
+     - title: atax
+       suite: polybench
+       directory: /home/exu03/workspace/GPU_Benchmarks/polybench/ATAX/
+       command: /home/exu03/workspace/GPU_Benchmarks/polybench/ATAX/atax.exe
+       args:
+       - size: 32
+       - size: 64
+   ```
 
-- [Step 2] Check currently there is no file with path `traceid/{suite}-{benchmark}.txt`, e.g., `traceid/polybench-atax.txt`. Remove it if exists.
+2. **Remove Existing Trace ID File**  
+   Ensure there is no file at the path `traceid/{suite}-{benchmark}.txt`. For example, `traceid/polybench-atax.txt`. If it exists, delete it.
 
-- [Step 3] Activate your python environment and then run:
-```shell
-python schedule/schedule.py --collect etc/{suite}/{benchmark}.yaml
-# Example: python schedule/schedule.py --collect etc/polybench/atax.yaml
-```
+3. **Run the Schedule Script**  
+   Activate your Python environment and execute the script with the configuration file:
+   ```shell
+   python schedule/schedule.py --collect etc/{suite}/{benchmark}.yaml
+   # Example: python schedule/schedule.py --collect etc/polybench/atax.yaml
+   ```
 
-- [Step 4] You may check the progress logs of the profiles, traces and simulations processes in file `etc/{suite}/{bemnchmark}-log.csv`, e.g., `etc/polybench/atax-log.csv`.
+4. **Check Progress Logs**  
+   Monitor the progress of profiles, traces, and simulations in the log file `etc/{suite}/{benchmark}-log.csv`. For example, `etc/polybench/atax-log.csv`.
