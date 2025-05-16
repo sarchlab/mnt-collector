@@ -5,7 +5,8 @@ from datetime import datetime
 import pytz
 import argparse
 
-MNT_COLLECTOR_PATH = "/home/exu03/workspace/mnt-collector/mnt-collector"
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+MNT_COLLECTOR_PATH = os.path.join(BASE_PATH, "../mnt-collector")
 
 def log_event(log_file, event_time, event_type, status, source_yaml, command):
     """Log an event to the log file."""

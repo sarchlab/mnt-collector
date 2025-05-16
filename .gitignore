@@ -17,3 +17,4 @@ traceid/*
 output*.txt
 
 venv/*
+shell*.txt
