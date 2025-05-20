@@ -244,7 +244,7 @@ func deleteS3Folders(s3PathSet map[string]struct{}) error {
 		log.Infof("Deleted folder: %s", s3Path)
 	}
 
-	log.Infof("[AWS AWS] %d trace folders deleted successfully", deletedCount)
+	log.Infof("[AWS Traces] %d trace folders deleted successfully", deletedCount)
 	return nil
 }
 
@@ -270,7 +270,7 @@ func checkS3Paths(s3PathSet map[string]struct{}, secrets *Secrets) error {
 			log.Errorf("S3 folders not found: %s", s3Path)
 		}
 	}
-	log.Infof("[AWS AWS] %d traces found (INFO file detected) out of %d paths recorded in mnt.traces", existCount, len(s3PathSet))
+	log.Infof("[AWS Traces] %d traces found (INFO file detected) out of %d paths recorded in mnt.traces", existCount, len(s3PathSet))
 	return nil
 }
 
