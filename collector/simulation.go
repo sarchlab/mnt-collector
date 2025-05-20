@@ -3,7 +3,9 @@ package collector
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -53,6 +55,13 @@ func RunSimulationCollection() {
 }
 
 func simulate(traceDir string) (SimData, error) {
+
+	// Check if traceDir/traces exists and is a directory
+	tracesPath := filepath.Join(traceDir, "traces")
+	info, err := os.Stat(tracesPath)
+	if err == nil && info.IsDir() {
+		traceDir = tracesPath
+	}
 	cmdStr := fmt.Sprintf("-trace-dir %s", traceDir)
 	cmdArgs := strings.Split(cmdStr, " ")
 	cmd := exec.Command(config.C.Experiment.Runfile, cmdArgs...)
@@ -60,7 +69,7 @@ func simulate(traceDir string) (SimData, error) {
 	var outBuff bytes.Buffer
 	cmd.Stdout = &outBuff
 
-	err := runNormalCmdWithTimer(cmd)
+	err = runNormalCmdWithTimer(cmd)
 	if err != nil {
 		log.Panic("Failed to run simulation")
 	}

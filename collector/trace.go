@@ -1,7 +1,9 @@
 package collector
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -74,6 +76,7 @@ func generateTrace(c CaseSetting) (string, error) {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
 		cmd.Env = append(cmd.Env, "USER_DEFINED_FOLDERS=1")
 		cmd.Env = append(cmd.Env, fmt.Sprintf("TRACES_FOLDER=%s", dir))
+		// fmt.Printf("cmd.Env: %v\n", cmd.Env)
 		return cmd
 	}
 
@@ -185,6 +188,28 @@ func uploadTraceToDB(c CaseSetting, s3Path string, size string) {
 		}
 		fileName := fmt.Sprintf("traceid/%s-%s.txt", c.Suite, c.Title)
 
+		exists := false
+		if file, err := os.Open(fileName); err == nil {
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				if scanner.Text() == strings.TrimSuffix(logLine, "\n") {
+					exists = true
+					break
+				}
+			}
+			file.Close()
+		} else if !os.IsNotExist(err) {
+			log.WithError(err).Errorf("Failed to open %s for reading", fileName)
+			return
+		}
+
+		if exists {
+			// No need to write the line again
+			log.Infof("No need to write the line %s again", logLine)
+			return
+		}
+
+		// Append the line since it's new
 		f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.WithError(err).Errorf("Failed to open %s", fileName)
@@ -211,8 +236,139 @@ func storeTraceToS3(traceDir string) string {
 	return objectPath
 }
 
+func moveTracesToDir(dir string) error {
+	tracesDir := filepath.Join(dir, "traces")
+
+	// Check if traces directory exists
+	info, err := os.Stat(tracesDir)
+	if os.IsNotExist(err) || !info.IsDir() {
+		return nil // Nothing to do
+	} else if err != nil {
+		return err
+	}
+
+	// Read files directly under tracesDir
+	entries, err := os.ReadDir(tracesDir)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue // Skip subdirectories
+		}
+
+		srcPath := filepath.Join(tracesDir, entry.Name())
+		dstPath := filepath.Join(dir, entry.Name())
+
+		// Open source file
+		srcFile, err := os.Open(srcPath)
+		if err != nil {
+			return err
+		}
+		defer srcFile.Close()
+
+		// Create destination file
+		dstFile, err := os.Create(dstPath)
+		if err != nil {
+			return err
+		}
+		defer dstFile.Close()
+
+		// Copy contents
+		if _, err := io.Copy(dstFile, srcFile); err != nil {
+			return err
+		}
+	}
+
+	// Remove the traces directory after copying
+	return os.RemoveAll(tracesDir)
+}
+
 func processTrace(dir string) {
-	cmd := exec.Command(config.TracerToolProcessor(), fmt.Sprintf("%s/kernelslist", dir))
+	// dir = filepath.Join(dir, "traces")
+	moveTracesToDir(dir)
+	// cmd := exec.Command(config.TracerToolProcessor(), fmt.Sprintf("%s/kernelslist", dir))
+	pattern := filepath.Join(dir, "kernelslist*")
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		log.WithError(err).Error("Failed to search for kernelslist files")
+		return
+	}
+	if len(matches) == 0 {
+		log.Warnf("No kernelslist file found in: %s", dir)
+		return
+	}
+	if len(matches) > 1 {
+		log.Warnf("More than 1 kernelslist files found in: %s", dir)
+	}
+
+	kernelslistPath := matches[0] // use the first match
+
+	file, err := os.Open(kernelslistPath)
+	if err != nil {
+		log.WithError(err).Errorf("Failed to open file: %s", kernelslistPath)
+		return
+	}
+	defer file.Close()
+
+	// Check if unxz is available
+	if _, err := exec.LookPath("unxz"); err != nil {
+		log.Warn("unxz command not found, skipping decompression")
+	}
+
+	var processedLines []string
+	var unxzCount int
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		trimmed := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trimmed, "kernel-") {
+			fullPath := filepath.Join(dir, trimmed)
+
+			if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+				log.Errorf("File %s is recorded in %s, but not found in path %s", trimmed, filepath.Base(kernelslistPath), fullPath)
+				processedLines = append(processedLines, trimmed)
+				continue
+			}
+
+			if strings.HasSuffix(trimmed, ".xz") {
+				cmd := exec.Command("unxz", fullPath)
+				if err := cmd.Run(); err != nil {
+					log.WithError(err).Errorf("Failed to unxz file: %s", fullPath)
+				} else {
+					unxzCount++
+				}
+				trimmed = strings.TrimSuffix(trimmed, ".xz")
+			}
+		}
+
+		processedLines = append(processedLines, trimmed)
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.WithError(err).Errorf("Failed to read file: %s", kernelslistPath)
+		return
+	}
+
+	outputPath := filepath.Join(dir, "kernelslist_processed")
+	outFile, err := os.Create(outputPath)
+	if err != nil {
+		log.WithError(err).Errorf("Failed to create processed kernelslist file: %s", outputPath)
+		return
+	}
+	defer outFile.Close()
+
+	for _, line := range processedLines {
+		_, _ = outFile.WriteString(line + "\n")
+	}
+
+	log.Infof("Finished unxz for %d files and created a new kernelslist_processed file in path %s", unxzCount, outputPath)
+
+	cmd := exec.Command(config.TracerToolProcessor(), outputPath) // kernelslistPath
+
 	if err := runNormalCmdWithTimer(cmd); err != nil {
 		log.WithError(err).Error("Failed to run traces processor")
 		return
@@ -220,17 +376,50 @@ func processTrace(dir string) {
 
 	log.Info("Deleting original trace files")
 	cmd = exec.Command("bash", "-c", fmt.Sprintf("rm %s/*.trace", dir))
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
-		log.WithField("dir", dir).WithError(err).Error("Failed to remove trace files")
+		log.WithField("dir", dir).WithError(err).Error("Failed to remove .trace files")
 		return
 	}
 
-	cmd = exec.Command("rm", fmt.Sprintf("%s/kernelslist", dir))
+	cmd = exec.Command("bash", "-c", fmt.Sprintf("rm %s/*.xz", dir))
 	err = cmd.Run()
 	if err != nil {
-		log.WithError(err).Error("Failed to remove kernelslist")
-		return
+		log.WithField("dir", dir).WithError(err).Error("Failed to remove .xz files")
+	}
+
+	// cmd = exec.Command("rm", fmt.Sprintf("%s/kernelslist", dir))
+	// err = cmd.Run()
+	// if err != nil {
+	// 	log.WithError(err).Error("Failed to remove kernelslist")
+	// 	return
+	// }
+	removeTraceRelatedFiles(dir)
+}
+
+func removeTraceRelatedFiles(dir string) {
+	patterns := []string{
+		"kernelslist_*",
+		"kernel*.trace",
+		"stats_*",
+	}
+
+	for _, p := range patterns {
+		fullPattern := filepath.Join(dir, p)
+		files, err := filepath.Glob(fullPattern)
+		if err != nil {
+			log.WithError(err).Errorf("Failed to find files matching pattern: %s", p)
+			continue
+		}
+
+		for _, file := range files {
+			err := os.Remove(file)
+			if err != nil {
+				log.WithError(err).Errorf("Failed to remove file: %s", file)
+			} else {
+				log.Infof("Successfully removed file: %s", file)
+			}
+		}
 	}
 }
 

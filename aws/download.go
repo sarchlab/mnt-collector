@@ -81,6 +81,13 @@ func SyncDirToLocal(prefix string) (string, error) {
 		if fileExist(localFile) {
 			continue
 		}
+
+		// Ensure the directory for localFile exists
+		if err := os.MkdirAll(filepath.Dir(localFile), os.ModePerm); err != nil {
+			log.WithField("local_path", localFile).WithError(err).Error("Failed to create directory")
+			return "", err
+		}
+
 		log.WithField("object", obj).Info("Downloading object")
 		err = getObject(obj, localFile)
 		if err != nil {

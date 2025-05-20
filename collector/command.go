@@ -23,7 +23,7 @@ func runNormalCmdWithTimer(cmd *exec.Cmd) error {
 		"cmd":  cmd.Path,
 		"args": cmd.Args,
 		//"env":  cmd.Env,
-	}).Debug("Command started")
+	}).Debug("Command started in runNormalCmdWithTimer")
 
 	oneSecondTicker := time.NewTicker(1 * time.Second)
 	defer oneSecondTicker.Stop()
@@ -61,7 +61,7 @@ func runGPUCmdWithTimer(cmd *exec.Cmd) error {
 		"cmd":  cmd.Path,
 		"args": cmd.Args,
 		//"env":  cmd.Env,
-	}).Debug("Command started")
+	}).Debug("Command started in runGPUCmdWithTimer")
 
 	oneSecondTicker := time.NewTicker(1 * time.Second)
 	defer oneSecondTicker.Stop()
