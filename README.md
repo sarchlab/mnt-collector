@@ -32,18 +32,23 @@ Available Commands:
   profiles    Use Nvidia system to profile the cases and upload the data to database & cloud.
   simulations Use the given simulator to run traces and upload the data to database.
   traces      Use Nvbit to generate traces and upload the data to database & cloud.
+  delete      Connect to both mongodb and s3 to delete specified entries together.
 
 Flags:
       --collect string   yaml file that store collection settings (default is etc/collects.yaml) (default "ect/collects.yaml")
   -h, --help             help for mnt-collector
       --secret string    yaml file that store secret tokens (default is etc/secrets.yaml) (default "etc/secrets.yaml")
+      --machine string       machine name filter, for delete only (required)
+      --cuda-version string  CUDA version filter, for delete only (required)
+      --suite string         suite name filter, for delete only (optional, default is "all")
+      --benchmark string     benchmark title filter, for delete only (optional, default is "all")
   -t, --toggle           Help message for toggle
 
 Use "mnt-collector [command] --help" for more information about a command.
 ```
 
 
-### Schedule
+### Schedule [Run profiles + traces + simulations together]
 To run `mnt-collector` with profiles, traces, and simulations together, use the Python script `schedule/schedule.py`.
 
 #### Steps
@@ -87,3 +92,11 @@ To run `mnt-collector` with profiles, traces, and simulations together, use the 
 
 4. **Check Progress Logs**  
    Monitor the progress of profiles, traces, and simulations in the log file `etc/{suite}/{benchmark}-log.csv`. For example, `etc/polybench/atax-log.csv`.
+
+### Delete
+The `delete` command allows you to remove specific entries from both MongoDB and S3 storage based on the provided filters.
+
+#### Usage
+```shell
+mnt-collector delete --machine <machine_name> --cuda-version <cuda_version> [--suite <suite_name>] [--benchmark <benchmark_title>]
+```
