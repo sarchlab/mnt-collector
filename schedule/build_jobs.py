@@ -68,7 +68,7 @@ JOB_DICT = {
     }
 }
 
-PARAM_DICT = {"blockDimX": [8, 16, 32], "size": [32, 48, 64, 96, 128, 192, 256]}
+PARAM_DICT = {"blockDimX": [8, 16, 32], "size": [32, 48, 64, 96, 128, 192, 256, 384, 512]}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build YAML job files for benchmarks.")
