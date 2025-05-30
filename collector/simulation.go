@@ -50,6 +50,7 @@ func RunSimulationCollection() {
 			uploadSimToDB(traceID, res)
 		} else {
 			log.Info("skip uploading to server")
+			fmt.Println(res.PredictCycle)
 		}
 	}
 }
