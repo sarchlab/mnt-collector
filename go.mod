@@ -50,4 +50,4 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
-// replace github.com/sarchlab/mnt-backend => ../mnt-backend
+replace github.com/sarchlab/mnt-backend => ../mnt-backend
