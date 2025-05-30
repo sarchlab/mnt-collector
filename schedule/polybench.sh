@@ -6,5 +6,5 @@ source venv/bin/activate
 
 for title in 3dconv 3mm atax bicg gemm gesummv mvt syrk; do
     echo "Running: python schedule/schedule.py --collect etc/polybench/${title}.yaml"
-    python schedule/schedule.py --collect etc/polybench/${title}.yaml
+    python schedule/schedule.py --collect etc/polybench/${title}.yaml || true
 done

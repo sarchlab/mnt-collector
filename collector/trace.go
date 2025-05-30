@@ -72,11 +72,12 @@ func generateTrace(c CaseSetting) (string, error) {
 
 	getCmd := func() *exec.Cmd {
 		cmd := exec.Command(c.Command, args...)
-		cmd.Env = append(os.Environ(), fmt.Sprintf("LD_PRELOAD=%s", config.TracerToolSo()))
+		// cmd.Env = append(os.Environ(), fmt.Sprintf("LD_PRELOAD=%s", config.TracerToolSo()))
+		// cmd.Env = append(cmd.Env, fmt.Sprintf("LD_PRELOAD=%s", config.TracerToolSo()))
 		cmd.Env = append(cmd.Env, fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
 		cmd.Env = append(cmd.Env, "USER_DEFINED_FOLDERS=1")
 		cmd.Env = append(cmd.Env, fmt.Sprintf("TRACES_FOLDER=%s", dir))
-		// fmt.Printf("cmd.Env: %v\n", cmd.Env)
+		fmt.Printf("cmd.Env: %v\n", cmd.Env)
 		return cmd
 	}
 
@@ -238,6 +239,7 @@ func storeTraceToS3(traceDir string) string {
 
 func moveTracesToDir(dir string) error {
 	tracesDir := filepath.Join(dir, "traces")
+	fmt.Printf("in moveTracesToDir, tracesDir: %s\n", tracesDir)
 
 	// Check if traces directory exists
 	info, err := os.Stat(tracesDir)
@@ -246,6 +248,7 @@ func moveTracesToDir(dir string) error {
 	} else if err != nil {
 		return err
 	}
+	fmt.Printf("in moveTracesToDir, tracesDir exists: %s\n", tracesDir)
 
 	// Read files directly under tracesDir
 	entries, err := os.ReadDir(tracesDir)
@@ -282,7 +285,8 @@ func moveTracesToDir(dir string) error {
 	}
 
 	// Remove the traces directory after copying
-	return os.RemoveAll(tracesDir)
+	err = os.RemoveAll(tracesDir)
+	return err
 }
 
 func processTrace(dir string) {

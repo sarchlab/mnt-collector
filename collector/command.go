@@ -62,6 +62,10 @@ func runGPUCmdWithTimer(cmd *exec.Cmd) error {
 		"args": cmd.Args,
 		//"env":  cmd.Env,
 	}).Debug("Command started in runGPUCmdWithTimer")
+	// envPrint := cmd.Env
+	// for _, env := range envPrint {
+	// 	fmt.Printf("\r\n%s \\", env)
+	// }
 
 	oneSecondTicker := time.NewTicker(1 * time.Second)
 	defer oneSecondTicker.Stop()
