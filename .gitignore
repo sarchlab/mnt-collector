@@ -1,5 +1,5 @@
 etc/*
-etc/secrets.yaml
+!etc/secrets.yaml
 !etc/secrets.yaml.example
 !etc/benchmarks.yaml
 !etc/simulations.yaml
