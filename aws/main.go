@@ -12,7 +12,7 @@ import (
 	"github.com/sarchlab/mnt-collector/config"
 )
 
-const traceDir = "/tmp/mnt-traces/"
+const traceDir = "./tmp/mnt-traces/"
 
 var mntClient *s3.Client
 var mntBucket *string

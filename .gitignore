@@ -19,3 +19,4 @@ output*.txt
 
 venv/*
 shell*.txt
+tmp/*

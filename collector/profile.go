@@ -5,15 +5,16 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
 	"github.com/sarchlab/mnt-collector/mntbackend"
 	log "github.com/sirupsen/logrus"
 )
 
-const profilesDir = "/tmp/mnt-collector/profiles/"
+const profilesDir = "./tmp/mnt-collector/profiles/"
 
 type ProfileData struct {
 	AvgNanoSec   float64

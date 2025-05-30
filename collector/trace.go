@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	traceRootLocal  = "/tmp/mnt-collector/traces/"
+	traceRootLocal  = "./tmp/mnt-collector/traces/"
 	traceRootRemote = "traces/"
 )
 
