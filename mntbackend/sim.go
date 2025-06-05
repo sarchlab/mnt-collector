@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
+	"github.com/sarchlab/mnt-collector/externel/mnt-backend/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

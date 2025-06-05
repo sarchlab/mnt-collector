@@ -8,8 +8,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
+	"github.com/sarchlab/mnt-collector/externel/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/mntbackend"
 	log "github.com/sirupsen/logrus"
 )

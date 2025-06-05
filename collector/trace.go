@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/aws"
 	"github.com/sarchlab/mnt-collector/config"
+	"github.com/sarchlab/mnt-collector/externel/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/mntbackend"
 	log "github.com/sirupsen/logrus"
 )

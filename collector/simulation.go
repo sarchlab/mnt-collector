@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/aws"
 	"github.com/sarchlab/mnt-collector/config"
+	"github.com/sarchlab/mnt-collector/externel/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/mntbackend"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 

@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/sarchlab/mnt-backend/model"
 	"github.com/sarchlab/mnt-collector/config"
+	"github.com/sarchlab/mnt-collector/externel/mnt-backend/model"
 	log "github.com/sirupsen/logrus"
 )
 
