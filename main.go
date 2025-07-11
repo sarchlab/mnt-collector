@@ -18,7 +18,7 @@ func main() {
 func initLogSettings() {
 	lumberjackLogger := &lumberjack.Logger{
 		Filename:   "logfile.log",
-		MaxSize:    2,
+		MaxSize:    10,
 		MaxBackups: 3,
 		MaxAge:     30,
 	}

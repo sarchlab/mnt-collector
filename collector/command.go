@@ -19,11 +19,11 @@ func runNormalCmdWithTimer(cmd *exec.Cmd) error {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"cmd":  cmd.Path,
-		"args": cmd.Args,
-		//"env":  cmd.Env,
-	}).Debug("Command started in runNormalCmdWithTimer")
+	// log.WithFields(log.Fields{
+	// 	"cmd":  cmd.Path,
+	// 	"args": cmd.Args,
+	// 	//"env":  cmd.Env,
+	// }).Debug("Command started in runNormalCmdWithTimer")
 
 	oneSecondTicker := time.NewTicker(1 * time.Second)
 	defer oneSecondTicker.Stop()
@@ -45,7 +45,7 @@ func runNormalCmdWithTimer(cmd *exec.Cmd) error {
 				return err
 			}
 			fmt.Println("\nCommand finished successfully.")
-			log.WithField("elapsed", time.Since(startTime)).Info("Command finished")
+			log.WithField("elapsed", time.Since(startTime)).Info("runNormalCmdWithTimer: Command finished")
 			return nil
 		}
 	}
@@ -102,7 +102,7 @@ func runGPUCmdWithTimer(cmd *exec.Cmd) error {
 				return err
 			}
 			fmt.Println("\nCommand finished successfully.")
-			log.WithField("elapsed", time.Since(startTime)).Info("Command finished")
+			log.WithField("elapsed", time.Since(startTime)).Info("runGPUCmdWithTimer: Command finished")
 			return nil
 		}
 	}

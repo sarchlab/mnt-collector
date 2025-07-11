@@ -15,6 +15,7 @@ rsync-exclude.txt
 
 traceid/*
 output*.txt
+.DS_Store
 
 venv/*
 shell*.txt
