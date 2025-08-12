@@ -20,3 +20,5 @@ output*.txt
 venv/*
 shell*.txt
 tmp/*
+ncu_*
+profile_result*
