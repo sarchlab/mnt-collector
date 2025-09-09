@@ -52,6 +52,9 @@ def run_command(command, log_file, event_type, source_yaml):
 def main():
     parser = argparse.ArgumentParser(description="Run simulation tasks.")
     parser.add_argument("--collect", required=True, help="Path to the YAML file.")
+    parser.add_argument("--no-profile", action="store_true", help="Skip profiles step.")
+    parser.add_argument("--no-trace", action="store_true", help="Skip traces step.")
+    parser.add_argument("--no-simulation", action="store_true", help="Skip simulations step.")
     args = parser.parse_args()
 
     yaml_path = args.collect
@@ -63,28 +66,29 @@ def main():
     title_path = os.path.join(base_dir, "../simulations-title.yaml")
     
     # Step 1: Run profiles command
-    profiles_command = f"{MNT_COLLECTOR_PATH} profiles --collect {yaml_path}"
-    run_command(profiles_command, log_file, "profiles", yaml_path)
+    if not args.no_profile:
+        profiles_command = f"{MNT_COLLECTOR_PATH} profiles --collect {yaml_path}"
+        run_command(profiles_command, log_file, "profiles", yaml_path)
     
     # Step 2: Run traces command
-    traces_command = f"{MNT_COLLECTOR_PATH} traces --collect {yaml_path}"
-    run_command(traces_command, log_file, "traces", yaml_path)
-    
-    # Step 3: Read traceid files
-    cases = read_yaml_cases(yaml_path)
-    traceid_files = []
-    for case in cases:
-        suite = case['suite']
-        title = case['title']
-        traceid_file = os.path.join(base_dir, f"../../traceid/{suite}-{title}.txt")
-        traceid_files.append(traceid_file)
-    
-    # Step 4: Generate simulations YAML
-    generate_simulations_yaml(simulations_path, title_path, traceid_files)
-    
-    # Step 5: Run simulations command
-    simulations_command = f"{MNT_COLLECTOR_PATH} simulations --collect {simulations_path}"
-    run_command(simulations_command, log_file, "simulations", simulations_path)
+    if not args.no_trace:
+        traces_command = f"{MNT_COLLECTOR_PATH} traces --collect {yaml_path}"
+        run_command(traces_command, log_file, "traces", yaml_path)
+
+    # Step 3-5: Read traceid files / Generate simulations YAML / Run simulations command
+    if not args.no_simulation:
+        cases = read_yaml_cases(yaml_path)
+        traceid_files = []
+        for case in cases:
+            suite = case['suite']
+            title = case['title']
+            traceid_file = os.path.join(base_dir, f"../../traceid/{suite}-{title}.txt")
+            traceid_files.append(traceid_file)
+        
+        generate_simulations_yaml(simulations_path, title_path, traceid_files)
+        
+        simulations_command = f"{MNT_COLLECTOR_PATH} simulations --collect {simulations_path}"
+        run_command(simulations_command, log_file, "simulations", simulations_path)
 
 if __name__ == "__main__":
     main()
