@@ -22,3 +22,4 @@ shell*.txt
 tmp/*
 ncu_*
 profile_result*
+*.sqlite3

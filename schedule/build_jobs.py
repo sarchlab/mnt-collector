@@ -73,12 +73,15 @@ JOB_DICT = {
     "gpu-benches": {
         "cuda-memcpy": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/cuda-memcpy/cuda-memcpy.exe",
     },
+    "simtune" : {
+        "emptykernel": "/home/enze/workspace/GPU_Benchmarks/simtune/emptykernel/emptykernel.exe",
+    }
 }
 
 # PARAM_DICT = {"blockDimX": [8, 16, 32], "size": [32, 48, 64, 96, 128, 192, 256, 384, 512]}
 # PARAM_DICT = {"size": [524288], "order": [256, 512], "k": [1250, 2500, 5000, 10000, 20000, 40000]}
 # PARAM_DICT = {"boxes1d": [10, 20, 30, 40], "n": [50, 100]}
-PARAM_DICT = {"size": [32, 48, 64, 96, 128, 192, 256, 384, 512]}
+PARAM_DICT = {"thread": [32], "block": [1]}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build YAML job files for benchmarks.")
