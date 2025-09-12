@@ -47,6 +47,8 @@ type Param struct {
 	R           string `json:"r,omitempty" bson:"r,omitempty" yaml:"r,omitempty"`
 	Lat         string `json:"lat,omitempty" bson:"lat,omitempty" yaml:"lat,omitempty"`
 	Lng         string `json:"lng,omitempty" bson:"lng,omitempty" yaml:"lng,omitempty"`
+	Thread      string `json:"thread,omitempty" bson:"thread,omitempty" yaml:"thread,omitempty"`
+	Block       string `json:"block,omitempty" bson:"block,omitempty" yaml:"block,omitempty"`
 }
 
 func GetAllCases(client *mongo.Client) ([]CaseKey, error) {

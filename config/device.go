@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
-	"strings"
 	"os/exec"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -16,7 +16,7 @@ var (
 	computeCapability string
 	frequency         uint32
 	maxFrequency      uint32
-	cudaVersion 	  string
+	cudaVersion       string
 )
 
 func DeviceName() string {
@@ -72,7 +72,6 @@ func LoadDevice(deviceID int) {
 	if err != nvml.SUCCESS {
 		log.WithField("error", nvml.ErrorString(err)).Panic("Failed to get handle for device")
 	}
-
 
 	cudaVersion = getCudaVersion()
 	initDeviceName(device)
@@ -136,7 +135,7 @@ func deviceMustIdle(device nvml.Device) {
 		log.WithField("error", nvml.ErrorString(err)).Panic("Failed to get utilization rates of device")
 	}
 	if utilization.Gpu != 0 {
-		log.Warn("Device is not idle")
+		log.WithField("utilization", utilization.Gpu).Warn("Device is not idle (must be 0%)")
 		// log.Panic("Device is not idle")
 	}
 }

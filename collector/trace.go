@@ -54,7 +54,7 @@ func RunTraceCollection() {
 			s3Path := storeTraceToS3(traceDir)
 			log.WithField("s3Path", s3Path).Info("Trace stored to S3")
 
-			cleanOldTraceData(c)
+			// cleanOldTraceData(c)
 			uploadTraceToDB(c, s3Path, traceSize)
 		} else {
 			log.Info("Skip uploading to server")
@@ -72,7 +72,7 @@ func generateTrace(c CaseSetting) (string, error) {
 
 	getCmd := func() *exec.Cmd {
 		cmd := exec.Command(c.Command, args...)
-		// cmd.Env = append(os.Environ(), fmt.Sprintf("LD_PRELOAD=%s", config.TracerToolSo()))
+		cmd.Env = append(os.Environ(), fmt.Sprintf("LD_PRELOAD=%s", config.TracerToolSo()))
 		// cmd.Env = append(cmd.Env, fmt.Sprintf("LD_PRELOAD=%s", config.TracerToolSo()))
 		cmd.Env = append(cmd.Env, fmt.Sprintf("CUDA_VISIBLE_DEVICES=%d", config.C.DeviceID))
 		cmd.Env = append(cmd.Env, "USER_DEFINED_FOLDERS=1")
