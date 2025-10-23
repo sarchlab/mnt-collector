@@ -70,6 +70,7 @@ JOB_DICT = {
         "b+tree": "/home/enze/workspace/GPU_Benchmarks/rodinia/b+tree/b+tree.exe",
         "lavamd": "/home/enze/workspace/GPU_Benchmarks/rodinia/lavaMD/lavaMD.exe",
         "backprop": "/home/enze/workspace/GPU_Benchmarks/rodinia/backprop/backprop.exe",
+        "kmeans": "/home/enze/workspace/GPU_Benchmarks/rodinia/kmeans/kmeans.exe",
     },
     "gpu-benches": {
         "cuda-memcpy": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/cuda-memcpy/cuda-memcpy.exe",
@@ -95,7 +96,8 @@ JOB_DICT = {
 # PARAM_DICT = {"block": [256], "size": [100000 * (2 ** i) for i in range(0, 1)]} # 5, 10
 # PARAM_DICT = {"block": [128, 256], "size": [10000 * (2 ** i) for i in range(0, 7)]} # 5, 10
 # PARAM_DICT = {"block": [32], "size": [16]} # 5, 10
-PARAM_DICT = {"block": [32, 64, 128], "size": [2**i for i in range(3, 11)]} # 5, 10
+# PARAM_DICT = {"block": [32, 64, 128], "size": [2**i for i in range(3, 11)]} # 5, 10
+PARAM_DICT = {"clusters": [16, 24, 32], "size": [128,192,256,384,512,768,1024,1536,2048,3072,4096,6144,8192]} # 5, 10
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build YAML job files for benchmarks.")

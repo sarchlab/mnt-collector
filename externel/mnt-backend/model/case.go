@@ -54,6 +54,7 @@ type Param struct {
 	Features    string `json:"features,omitempty" bson:"features,omitempty" yaml:"features,omitempty"`
 	Iteration   string `json:"iteration,omitempty" bson:"iteration,omitempty" yaml:"iteration,omitempty"`
 	Iters       string `json:"iters,omitempty" bson:"iters,omitempty" yaml:"iters,omitempty"`
+	Degree      string `json:"degree,omitempty" bson:"degree,omitempty" yaml:"degree,omitempty"`
 }
 
 func GetAllCases(client *mongo.Client) ([]CaseKey, error) {
