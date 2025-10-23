@@ -69,9 +69,16 @@ JOB_DICT = {
     "rodinia": {
         "b+tree": "/home/enze/workspace/GPU_Benchmarks/rodinia/b+tree/b+tree.exe",
         "lavamd": "/home/enze/workspace/GPU_Benchmarks/rodinia/lavaMD/lavaMD.exe",
+        "backprop": "/home/enze/workspace/GPU_Benchmarks/rodinia/backprop/backprop.exe",
     },
     "gpu-benches": {
         "cuda-memcpy": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/cuda-memcpy/cuda-memcpy.exe",
+        "gpu-cache": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/gpu-cache/gpu-cache.exe",
+        "gpu-small-kernels": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/gpu-small-kernels/gpu-small-kernels.exe",
+        "gpu-l2-cache": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/gpu-l2-cache/gpu-l2-cache.exe",
+        "gpu-stream": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/gpu-stream/gpu-stream.exe",
+        "gpu-l2-stream": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/gpu-l2-stream/gpu-l2-stream.exe",
+        "gpu-strides": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/gpu-strides/gpu-strides.exe",
     },
     "simtune" : {
         "emptykernel": "/home/enze/workspace/GPU_Benchmarks/simtune/emptykernel/emptykernel.exe",
@@ -81,7 +88,14 @@ JOB_DICT = {
 # PARAM_DICT = {"blockDimX": [8, 16, 32], "size": [32, 48, 64, 96, 128, 192, 256, 384, 512]}
 # PARAM_DICT = {"size": [524288], "order": [256, 512], "k": [1250, 2500, 5000, 10000, 20000, 40000]}
 # PARAM_DICT = {"boxes1d": [10, 20, 30, 40], "n": [50, 100]}
-PARAM_DICT = {"thread": [32], "block": [10]}
+# PARAM_DICT = {"thread": [16] + [32*i for i in range(1, 33)], "block": [2**i for i in range(17)]} # 5, 10
+# PARAM_DICT = {"thread": [16, 32, 64, 128], "size": [256 * i for i in [3, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15]]} # 5, 10
+# PARAM_DICT = {"thread": [16], "size": [2**i for i in range(0,1)]} # 5, 10
+# PARAM_DICT = {"block": [2, 4, 8], "size": [2**i for i in range(6, 13)]} # 5, 10
+# PARAM_DICT = {"block": [256], "size": [100000 * (2 ** i) for i in range(0, 1)]} # 5, 10
+# PARAM_DICT = {"block": [128, 256], "size": [10000 * (2 ** i) for i in range(0, 7)]} # 5, 10
+# PARAM_DICT = {"block": [32], "size": [16]} # 5, 10
+PARAM_DICT = {"block": [32, 64, 128], "size": [2**i for i in range(3, 11)]} # 5, 10
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build YAML job files for benchmarks.")

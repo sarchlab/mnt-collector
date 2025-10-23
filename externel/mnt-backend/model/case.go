@@ -49,6 +49,11 @@ type Param struct {
 	Lng         string `json:"lng,omitempty" bson:"lng,omitempty" yaml:"lng,omitempty"`
 	Thread      string `json:"thread,omitempty" bson:"thread,omitempty" yaml:"thread,omitempty"`
 	Block       string `json:"block,omitempty" bson:"block,omitempty" yaml:"block,omitempty"`
+	BlockSize   string `json:"blockSize,omitempty" bson:"blockSize,omitempty" yaml:"blockSize,omitempty"`
+	Clusters    string `json:"clusters,omitempty" bson:"clusters,omitempty" yaml:"clusters,omitempty"`
+	Features    string `json:"features,omitempty" bson:"features,omitempty" yaml:"features,omitempty"`
+	Iteration   string `json:"iteration,omitempty" bson:"iteration,omitempty" yaml:"iteration,omitempty"`
+	Iters       string `json:"iters,omitempty" bson:"iters,omitempty" yaml:"iters,omitempty"`
 }
 
 func GetAllCases(client *mongo.Client) ([]CaseKey, error) {
