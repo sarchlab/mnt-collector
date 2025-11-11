@@ -71,6 +71,16 @@ JOB_DICT = {
         "lavamd": "/home/enze/workspace/GPU_Benchmarks/rodinia/lavaMD/lavaMD.exe",
         "backprop": "/home/enze/workspace/GPU_Benchmarks/rodinia/backprop/backprop.exe",
         "kmeans": "/home/enze/workspace/GPU_Benchmarks/rodinia/kmeans/kmeans.exe",
+        "bfs": "/home/enze/workspace/GPU_Benchmarks/rodinia/bfs/bfs.exe",
+        "nn": "/home/enze/workspace/GPU_Benchmarks/rodinia/nn/nn.exe",
+        "gaussian": "/home/enze/workspace/GPU_Benchmarks/rodinia/gaussian/gaussian.exe",
+        "lavaMD": "/home/enze/workspace/GPU_Benchmarks/rodinia/lavaMD/lavaMD.exe",
+        "b+tree": "/home/enze/workspace/GPU_Benchmarks/rodinia/b+tree/b+tree.exe",
+        "heartwall": "/home/enze/workspace/GPU_Benchmarks/rodinia/heartwall/heartwall.exe",
+        "hotspot": "/home/enze/workspace/GPU_Benchmarks/rodinia/hotspot/hotspot.exe",
+        "cfd": "/home/enze/workspace/GPU_Benchmarks/rodinia/cfd/cfd.exe",
+        "pathfinder": "/home/enze/workspace/GPU_Benchmarks/rodinia/pathfinder/pathfinder.exe",
+        "lud": "/home/enze/workspace/GPU_Benchmarks/rodinia/lud/lud.exe",
     },
     "gpu-benches": {
         "cuda-memcpy": "/home/enze/workspace/GPU_Benchmarks/gpu-benches/cuda-memcpy/cuda-memcpy.exe",
@@ -83,6 +93,7 @@ JOB_DICT = {
     },
     "simtune" : {
         "emptykernel": "/home/enze/workspace/GPU_Benchmarks/simtune/emptykernel/emptykernel.exe",
+        "ffmakernel": "/home/enze/workspace/GPU_Benchmarks/simtune/ffmakernel/ffmakernel.exe",
     }
 }
 
@@ -97,7 +108,38 @@ JOB_DICT = {
 # PARAM_DICT = {"block": [128, 256], "size": [10000 * (2 ** i) for i in range(0, 7)]} # 5, 10
 # PARAM_DICT = {"block": [32], "size": [16]} # 5, 10
 # PARAM_DICT = {"block": [32, 64, 128], "size": [2**i for i in range(3, 11)]} # 5, 10
-PARAM_DICT = {"clusters": [16, 24, 32], "size": [128,192,256,384,512,768,1024,1536,2048,3072,4096,6144,8192]} # 5, 10
+# PARAM_DICT = {"block": [64, 128,256], "size": [10000, 15000, 20000, 30000, 40000, 60000, 80000, 120000, 160000]} # 5, 10
+# PARAM_DICT = {"clusters": [16, 24, 32], "size": [128,192,256,384,512,768,1024,1536,2048,3072,4096,6144,8192]} # 5, 10
+# bfs:
+# PARAM_DICT = {"degree": [3, 4, 5], "size": [2**i for i in range(3, 11)]} # 5, 10
+# gaussian:
+# PARAM_DICT = {"block": [64, 128], "size": [2**i for i in range(3, 11)]} # 5, 10
+# lavaMD:
+# PARAM_DICT = {"boxes1d": [256]} # 5, 10
+# PARAM_DICT = {"boxes1d": [1*i for i in range(1, 11)]} # 5, 10
+# PARAM_DICT = {"boxes1d": [2]} # 5, 10
+# b+tree:
+# PARAM_DICT = {"block": [128, 256], "size": [1000*i for i in range(1,7)]} 
+# heartwall:
+# PARAM_DICT = {"block": [128, 256], "size": [32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024]} 
+# hotspot: [failed to run]
+# PARAM_DICT = {"block": [128], "size": [2048]}
+# PARAM_DICT = {"block": [128, 256], "size": [32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024]}
+# cfd:
+# PARAM_DICT = {"block": [128], "size": [1024]}
+# PARAM_DICT = {"block": [128, 256], "size": [64] + [128*i for i in range(1, 9)]}
+# pathfinder:
+# PARAM_DICT = {"block": [128, 256], "size": [4] + [8*i for i in range(1, 9)]}
+# PARAM_DICT = {"block": [128, 256], "size": [64] + [128*i for i in range(1, 9)]}
+# lud:
+# PARAM_DICT = {"size": [8] + [16*i for i in range(1, 9)]}
+# PARAM_DICT = {"block": [128, 256], "size": [64] + [128*i for i in range(1, 9)]}
+
+# ffmakernel:
+# PARAM_DICT = {"thread": [16,32,64] + [128*i for i in range(1, 9)], "block": [4 ** i for i in range(0, 9)]} # 5, 10
+PARAM_DICT = {"thread": [32], "block": [1], "iters": [10, 20, 30, 40]} # 5, 10
+# PARAM_DICT = {"thread": [64, 128], "block": [32, 64, 128, 256, 384, 512, 640, 768, 896, 1024], "iters": [20, 40]} # 5, 10
+# PARAM_DICT = {"thread": [16] + [32*i for i in range(1, 33)], "block": [2**i for i in range(17)]} # 5, 10
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build YAML job files for benchmarks.")

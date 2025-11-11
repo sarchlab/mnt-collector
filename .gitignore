@@ -23,3 +23,4 @@ tmp/*
 ncu_*
 profile_result*
 *.sqlite3
+reports/*
