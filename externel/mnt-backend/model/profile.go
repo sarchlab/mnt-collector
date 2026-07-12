@@ -10,12 +10,14 @@ import (
 const profileCollection = "profiles"
 
 type DBProf struct {
-	ID           primitive.ObjectID `json:"id" bson:"_id"`
-	CaseKey      `bson:",inline"`
-	RepeatTimes  int32   `json:"repeat_times" bson:"repeat_times"`
-	AvgNanoSec   float64 `json:"avg_nano_sec" bson:"avg_nano_sec"`
-	Frequency    uint32  `json:"frequency" bson:"frequency"`
-	MaxFrequency uint32  `json:"max_frequency" bson:"max_frequency"`
+	ID             primitive.ObjectID `json:"id" bson:"_id"`
+	CaseKeyProfile `bson:",inline"`
+	RepeatTimes    int32   `json:"repeat_times" bson:"repeat_times"`
+	AvgNanoSec     float64 `json:"avg_nano_sec" bson:"avg_nano_sec"`
+	Frequency      uint32  `json:"frequency" bson:"frequency"`
+	MaxFrequency   uint32  `json:"max_frequency" bson:"max_frequency"`
+	Cycle          float64 `json:"cycle" bson:"cycle"`
+	// ProfileType    string  `json:"profile_type" bson:"profile_type"`
 }
 
 func InsertProf(client *mongo.Client, prof DBProf) (DBProf, error) {

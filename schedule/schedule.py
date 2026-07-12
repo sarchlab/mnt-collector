@@ -67,7 +67,10 @@ def main():
     
     # Step 1: Run profiles command
     if not args.no_profile:
-        profiles_command = f"{MNT_COLLECTOR_PATH} profiles --collect {yaml_path}"
+        profiles_command = f"{MNT_COLLECTOR_PATH} profiles --collect {yaml_path} --mode nsys"
+        run_command(profiles_command, log_file, "profiles", yaml_path)
+
+        profiles_command = f"{MNT_COLLECTOR_PATH} profiles --collect {yaml_path} --mode ncu"
         run_command(profiles_command, log_file, "profiles", yaml_path)
     
     # Step 2: Run traces command

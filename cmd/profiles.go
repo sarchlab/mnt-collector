@@ -4,6 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"strings"
+
 	"github.com/labstack/gommon/log"
 	"github.com/sarchlab/mnt-collector/aws"
 	"github.com/sarchlab/mnt-collector/collector"
@@ -45,7 +47,20 @@ Need gpu device.`,
 			log.Info("UploadToServer is set to false, no data will be uploaded to the server.")
 		}
 
-		collector.RunProfileCollection()
+		mode := "nsys"
+		if m, _ := cmd.Flags().GetString("mode"); m != "" {
+			mode = m
+		}
+		switch strings.ToLower(mode) {
+		case "ncu":
+			collector.RunProfileCollectionNCU()
+		case "nsys":
+			collector.RunProfileCollectionNSYS()
+		default:
+			log.Panicf("Unsupported profile mode: %s. It must be one of [ncu, nsys]", mode)
+		}
+
+		// collector.RunProfileCollection()
 	},
 }
 

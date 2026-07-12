@@ -20,9 +20,11 @@ type ProfileData struct {
 	AvgNanoSec   float64
 	Frequency    uint32
 	MaxFrequency uint32
+	Cycle        float64
+	ProfileType  string
 }
 
-func RunProfileCollection() {
+func RunProfileCollectionNSYS() {
 	caseSettings := generateCaseSettings(config.C.Cases)
 	repeatTimes := config.C.RepeatTimes
 
@@ -59,7 +61,7 @@ func RunProfileCollection() {
 
 			if config.C.UploadToServer {
 				log.Info("Start uploading to server")
-				uploadProfileToDB(c, data, repeatTimes)
+				uploadProfileToDBNSYS(c, data, repeatTimes)
 			} else {
 				log.Info("Skip uploading to server")
 			}
@@ -132,6 +134,8 @@ func getProfileData(profileFiles []string) ProfileData {
 		AvgNanoSec:   avgNanoSec,
 		Frequency:    config.Frequency(),
 		MaxFrequency: config.MaxFrequency(),
+		Cycle:        avgNanoSec / 1e3 * float64(config.MaxFrequency()),
+		ProfileType:  "nsys",
 		// AvgCycles: avgCycles,
 	}
 	log.WithFields(log.Fields{
@@ -170,20 +174,35 @@ func getKernelActivities(db *sqlx.DB) ([]profileRawData, error) {
 	return results, nil
 }
 
-func uploadProfileToDB(c CaseSetting, data ProfileData, repeatTimes int32) {
+func uploadProfileToDBNSYS(c CaseSetting, data ProfileData, repeatTimes int32) {
 	req := model.DBProf{
-		CaseKey: model.CaseKey{
-			EnvID:     mntbackend.EnvID(),
-			Suite:     c.Suite,
-			Benchmark: c.Title,
-			Param:     c.param,
+		CaseKeyProfile: model.CaseKeyProfile{
+			EnvID:       mntbackend.EnvID(),
+			Suite:       c.Suite,
+			Benchmark:   c.Title,
+			Param:       c.param,
+			ProfileType: data.ProfileType,
 		},
 		RepeatTimes:  repeatTimes,
 		AvgNanoSec:   data.AvgNanoSec,
 		Frequency:    data.Frequency,
 		MaxFrequency: data.MaxFrequency,
+		Cycle:        data.Cycle,
+		// ProfileType:  data.ProfileType,
 	}
+
+	log.WithFields(log.Fields{
+		"Case":         c,
+		"RepeatTimes":  repeatTimes,
+		"AvgNanoSec":   data.AvgNanoSec,
+		"Frequency":    data.Frequency,
+		"MaxFreq":      data.MaxFrequency,
+		"Cycle":        data.Cycle,
+		"profile_type": data.ProfileType,
+	}).Info("Uploading profile")
+
 	profileID, err := mntbackend.UpdOrUplProfile(req)
+
 	if err != nil {
 		log.WithFields(log.Fields{
 			"Case": c,

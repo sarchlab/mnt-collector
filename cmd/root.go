@@ -48,4 +48,6 @@ func init() {
 	deleteCmd.Flags().String("benchmark", "all", "benchmark title filter, for delete only")
 
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	profilesCmd.Flags().String("mode", "nsys", "profile mode: nsys (default) or ncu")
 }

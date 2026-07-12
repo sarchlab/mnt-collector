@@ -24,3 +24,6 @@ ncu_*
 profile_result*
 *.sqlite3
 reports/*
+*.ncu-rep
+test*.csv
+test*.txt
